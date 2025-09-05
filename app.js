@@ -15,6 +15,110 @@ import { startWebServer } from "./modules/web.js";
 
 dotenv.config();
 
+// File management utility functions
+async function getFilesRecursively(dir) {
+  const files = [];
+  try {
+    const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        files.push(...(await getFilesRecursively(fullPath)));
+      } else if (entry.isFile()) {
+        const stats = await fs.promises.stat(fullPath);
+        files.push({ path: fullPath, mtime: stats.mtimeMs });
+      }
+    }
+  } catch (error) {
+    console.error(`Error reading directory ${dir}:`, error.message);
+  }
+  return files;
+}
+
+async function removeEmptyFolders(dir) {
+  try {
+    const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await removeEmptyFolders(fullPath);
+      }
+    }
+    const isEmpty = (await fs.promises.readdir(dir)).length === 0;
+    if (isEmpty && dir !== SAVE_DIR) { // Don't delete the main SAVE_DIR
+      await fs.promises.rmdir(dir);
+      console.log(`Removed empty folder: ${dir}`);
+    }
+  } catch (error) {
+    console.error(`Error removing empty folders from ${dir}:`, error.message);
+  }
+}
+
+async function deleteOldFiles() {
+  try {
+    const files = await getFilesRecursively(SAVE_DIR);
+    if (!files.length) {
+      console.log("No files to delete.");
+      return "No files to delete.";
+    }
+    files.sort((a, b) => a.mtime - b.mtime);
+    const oldestFile = files[0];
+    await fs.promises.unlink(oldestFile.path);
+    console.log(`Deleted: ${oldestFile.path}`);
+    await removeEmptyFolders(SAVE_DIR);
+    return `🗑️ Deleted oldest file: ${path.basename(oldestFile.path)}`;
+  } catch (error) {
+    console.error("Error deleting files:", error.message);
+    return "❌ Failed to delete files.";
+  }
+}
+
+async function autoCleanOldFiles() {
+  try {
+    const files = await getFilesRecursively(SAVE_DIR);
+    if (!files.length) {
+      console.log("No files to auto-clean.");
+      return "No files found to auto-clean.";
+    }
+
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const oldFiles = files.filter((file) => file.mtime < thirtyDaysAgo);
+
+    if (!oldFiles.length) {
+      console.log("No files older than 30 days found.");
+      return "No files older than 30 days found.";
+    }
+
+    let deletedCount = 0;
+    let totalSize = 0;
+
+    for (const file of oldFiles) {
+      try {
+        const stats = await fs.promises.stat(file.path);
+        totalSize += stats.size;
+        await fs.promises.unlink(file.path);
+        deletedCount++;
+        console.log(`Auto-deleted: ${file.path}`);
+      } catch (error) {
+        console.error(`Failed to delete ${file.path}:`, error.message);
+      }
+    }
+
+    await removeEmptyFolders(SAVE_DIR);
+
+    const message =
+      `🧹 Auto-clean completed!\n` +
+      `✅ Deleted ${deletedCount} files older than 30 days\n` +
+      `💾 Freed up ${bytesToSize(totalSize)} of space`;
+
+    console.log(`Auto-clean: Deleted ${deletedCount} files, freed ${bytesToSize(totalSize)}`);
+    return message;
+  } catch (error) {
+    console.error("Error during auto-clean:", error.message);
+    return "❌ Auto-clean failed. Try again later.";
+  }
+}
+
 const RELAYS = [
   "wss://relay.damus.io",
   "wss://nos.lol",
@@ -255,7 +359,7 @@ function createRelayConnection() {
 
       // Check if it's a command (starts with known command words) or echo back
       const possibleCommand = cleanContent.split(/\s+/)[0].toLowerCase();
-      const validCommands = ["help", "whoami", "start", "download", "dl", "downloading", "find", "ip", "time", "stats"];
+      const validCommands = ["help", "whoami", "start", "download", "dl", "downloading", "find", "ip", "time", "stats", "clean", "autoclean"];
 
       const isStatusCommand = possibleCommand.startsWith("status_");
       const isCancelCommand = possibleCommand.startsWith("cancel_");
@@ -348,6 +452,8 @@ async function handleCommand(sender, text) {
           `status_<gid> - check download status\n` +
           `cancel_<gid> - cancel download\n` +
           `stats - show aria2 global stats\n` +
+          `clean - delete oldest file\n` +
+          `autoclean - delete files older than 30 days\n` +
           `ip - server IP info\n` +
           `time - server time\n\n` +
           `✅ You are authorized (whitelisted)`
@@ -421,6 +527,18 @@ async function handleCommand(sender, text) {
 
     case "stats":
       await handleStats(sender);
+      break;
+
+    case "clean":
+      console.log(`User ${short(sender)} requested clean command`);
+      const cleanResult = await deleteOldFiles();
+      await sendEncryptedDM(sender, cleanResult);
+      break;
+
+    case "autoclean":
+      console.log(`User ${short(sender)} requested autoclean command`);
+      const autocleanResult = await autoCleanOldFiles();
+      await sendEncryptedDM(sender, autocleanResult);
       break;
 
     default:
