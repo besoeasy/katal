@@ -1,6 +1,6 @@
-import axios from 'axios';
-import fs from 'fs';
-import path from 'path';
+import axios from "axios";
+import fs from "fs";
+import path from "path";
 
 // ------------------ File System Utils ------------------
 export function bytesToSize(bytes) {
@@ -65,9 +65,7 @@ export async function fetchTorrent(imdbId) {
     return streams
       .map((stream) => ({
         title: stream.title || "Unknown",
-        magnet: stream.infoHash 
-          ? `magnet:?xt=urn:btih:${stream.infoHash}&dn=${encodeURIComponent(stream.title || "torrent")}`
-          : null,
+        magnet: stream.infoHash ? `magnet:?xt=urn:btih:${stream.infoHash}&dn=${encodeURIComponent(stream.title || "torrent")}` : null,
       }))
       .filter((item) => item.magnet);
   } catch (error) {
@@ -93,10 +91,10 @@ export function formatDownloadSpeed(bytesPerSecond) {
 
 export function getDownloadProgress(completedLength, totalLength) {
   if (totalLength === 0) return { percent: 0, completed: 0, total: 0 };
-  
-  const completed = Math.round(completedLength / 1024 / 1024 * 100) / 100; // MB
-  const total = Math.round(totalLength / 1024 / 1024 * 100) / 100; // MB
+
+  const completed = Math.round((completedLength / 1024 / 1024) * 100) / 100; // MB
+  const total = Math.round((totalLength / 1024 / 1024) * 100) / 100; // MB
   const percent = Math.round((completedLength / totalLength) * 100 * 10) / 10; // 1 decimal
-  
+
   return { percent, completed, total };
 }

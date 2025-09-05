@@ -1,10 +1,6 @@
 import axios from "axios";
 import path from "path";
-import os from "os";
 
-// ------------------ Configuration ------------------
-export const SAVE_DIR = path.join(os.tmpdir(), "bukka");
-export const WEBX_PORT = 6799;
 const ARIA2_RPC_URL = "http://localhost:6398/jsonrpc";
 
 // ------------------ Default Trackers ------------------

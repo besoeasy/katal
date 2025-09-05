@@ -5,9 +5,11 @@ import http from "http";
 import fs from "fs";
 import serveHandler from "serve-handler";
 
-import { SAVE_DIR, WEBX_PORT, getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./modules/aria2.js";
+import { SAVE_DIR, getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./modules/aria2.js";
 
 import { bytesToSize, getDirectorySize, getIpData, getImdbId, fetchTorrent, short, formatDownloadSpeed, getDownloadProgress } from "./modules/utils.js";
+
+import { SERVERPORT, WEBPORT } from "./modules/vars.js";
 
 import { startWebServer } from "./modules/web.js";
 
@@ -15,7 +17,7 @@ dotenv.config();
 
 const RELAYS = [
   "wss://relay.damus.io",
-  "wss://nos.lol", 
+  "wss://nos.lol",
   "wss://relay.snort.social",
   "wss://nostr-pub.wellorder.net",
   "wss://nostr.oxtr.dev",
@@ -27,17 +29,17 @@ const RELAYS = [
   "wss://nostr-relay.wlvs.space",
   "wss://relay.current.fyi",
   "wss://brb.io",
-  "wss://nostr.fmt.wiz.biz"
+  "wss://nostr.fmt.wiz.biz",
 ];
 
 const randomcode = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = 0; i < 12; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
-}
+};
 
 const UNLOCKCODE = process.env.UNLOCKCODE || randomcode();
 
@@ -143,7 +145,7 @@ const sub = pool.subscribe(RELAYS, filter, {
       // Skip events older than EVENT_WINDOW_MS
       const ageMs = Date.now() - event.created_at * 1000;
       if (ageMs > EVENT_WINDOW_MS) {
-        console.log(`⏰ Skipping old event (${Math.round(ageMs/1000)}s old)`);
+        console.log(`⏰ Skipping old event (${Math.round(ageMs / 1000)}s old)`);
         return;
       }
 
@@ -155,20 +157,20 @@ const sub = pool.subscribe(RELAYS, filter, {
 
       // Mark event as processed and maintain cache size
       processedEvents.set(event.id, event.created_at * 1000);
-      
+
       // Remove oldest entries if we exceed the limit
       if (processedEvents.size > MAX_STORED_EVENTS) {
         // Find and remove the oldest entry
         let oldestEventId = null;
         let oldestTimestamp = Infinity;
-        
+
         for (const [eventId, timestamp] of processedEvents.entries()) {
           if (timestamp < oldestTimestamp) {
             oldestTimestamp = timestamp;
             oldestEventId = eventId;
           }
         }
-        
+
         if (oldestEventId) {
           processedEvents.delete(oldestEventId);
           console.log(`🗑️  Cache cleanup: removed oldest event, size: ${processedEvents.size}`);
@@ -195,27 +197,23 @@ const sub = pool.subscribe(RELAYS, filter, {
       // Check if user is authorized
       if (!whitelist.has(sender)) {
         console.log(`🚫 Unauthorized user ${short(sender)} - checking for unlock code`);
-        
+
         // Check if they sent the unlock code
         if (cleanContent === UNLOCKCODE) {
           whitelist.add(sender);
           console.log(`✅ User ${short(sender)} authorized with unlock code`);
-          await sendEncryptedDM(
-            sender, 
-            `🔓 Access granted! You are now authorized to use Katal Bot.\n\n` +
-            `Send "help" to see available commands.`
-          );
+          await sendEncryptedDM(sender, `🔓 Access granted! You are now authorized to use Katal Bot.\n\n` + `Send "help" to see available commands.`);
           return;
         }
-        
+
         // Not authorized and didn't send unlock code
         console.log(`❌ User ${short(sender)} not authorized - requesting unlock code`);
         await sendEncryptedDM(
           sender,
           `🔐 Access Required\n\n` +
-          `This bot requires authorization to prevent abuse.\n` +
-          `Please send the unlock code to gain access.\n\n` +
-          `Contact the bot owner for the unlock code.`
+            `This bot requires authorization to prevent abuse.\n` +
+            `Please send the unlock code to gain access.\n\n` +
+            `Contact the bot owner for the unlock code.`
         );
         return;
       }
@@ -256,23 +254,26 @@ const sub = pool.subscribe(RELAYS, filter, {
   onclose: (reason) => {
     console.warn("⚠️  Subscription closed:", reason);
     console.log("🔄 Attempting to reconnect...");
-    
+
     // Attempt to reconnect after 5 seconds
     setTimeout(() => {
       console.log("🔌 Reconnecting to relays...");
       // The pool will automatically handle reconnection
     }, 5000);
-  }
+  },
 });
 
 // Add connection health check with more detailed logging
 setInterval(() => {
   try {
     const connectedRelays = pool.seenOn.size || 0;
-    console.log(`💓 Health check - Cache: ${processedEvents.size} events, Whitelist: ${whitelist.size} users, Connected relays: ${connectedRelays}/${RELAYS.length}`);
-    
+    console.log(
+      `💓 Health check - Cache: ${processedEvents.size} events, Whitelist: ${whitelist.size} users, Connected relays: ${connectedRelays}/${RELAYS.length}`
+    );
+
     // Log relay connection status periodically (every 5th health check = 5 minutes)
-    if (Math.random() < 0.2) { // 20% chance each minute = roughly every 5 minutes
+    if (Math.random() < 0.2) {
+      // 20% chance each minute = roughly every 5 minutes
       console.log(`🌐 Relay status check - ensuring connectivity to all ${RELAYS.length} relays`);
     }
   } catch (error) {
@@ -333,9 +334,9 @@ async function handleCommand(sender, text) {
         `🤖 Katal Bot\n\n` +
         `Your User ID: ${userIdHash}\n` +
         `Used Space: ${bytesToSize(saveDirSize)}\n` +
-        `Server Port: ${WEBX_PORT}\n\n` +
+        `Server Port: ${SERVERPORT}\n\n` +
         `🌐 HTTP Access:\n` +
-        `http://pi.local:${WEBX_PORT}\n` +
+        `http://pi.local:${SERVERPORT}\n` +
         smbCredentials +
         `\n` +
         `Send help for all commands`;
@@ -793,10 +794,10 @@ setTimeout(() => {
     privkey: BOT_PRIVKEY_RAW,
     nsec: BOT_PRIVKEY_NSEC,
     unlockCode: UNLOCKCODE,
-    getWhitelistCount: () => whitelist.size
+    getWhitelistCount: () => whitelist.size,
   };
 
-  webServer = startWebServer(6798, botData, SAVE_DIR, WEBX_PORT);
+  webServer = startWebServer(WEBPORT, botData, SAVE_DIR, SERVERPORT);
 }, 1000);
 
 // Start periodic stats posting after a longer delay
@@ -812,4 +813,4 @@ http
       cleanUrls: false,
     });
   })
-  .listen(WEBX_PORT, () => {});
+  .listen(SERVERPORT, () => {});
