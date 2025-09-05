@@ -9,7 +9,7 @@ import { getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, c
 
 import { bytesToSize, getDirectorySize, getIpData, getImdbId, fetchTorrent, short, formatDownloadSpeed, getDownloadProgress } from "./modules/utils.js";
 
-import { SERVERPORT, WEBPORT, SAVE_DIR} from "./modules/vars.js";
+import { SERVERPORT, WEBPORT, SAVE_DIR, SMBPORT} from "./modules/vars.js";
 
 import { startWebServer } from "./modules/web.js";
 
@@ -797,7 +797,7 @@ setTimeout(() => {
     getWhitelistCount: () => whitelist.size,
   };
 
-  webServer = startWebServer(WEBPORT, botData, SAVE_DIR, SERVERPORT);
+  webServer = startWebServer(WEBPORT, botData, SAVE_DIR, SERVERPORT, SMBPORT);
 }, 1000);
 
 // Start periodic stats posting after a longer delay

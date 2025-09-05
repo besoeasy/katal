@@ -2,7 +2,7 @@ import express from "express";
 import { getGlobalStats } from "./aria2.js";
 import { bytesToSize, getDirectorySize } from "./utils.js";
 
-export function startWebServer(port, botData, saveDir, webxPort) {
+export function startWebServer(port, botData, saveDir, webxPort, SMBPORT) {
   const app = express();
 
   // Serve static files from public directory
@@ -24,6 +24,7 @@ export function startWebServer(port, botData, saveDir, webxPort) {
         pubkey: botData.pubkey,
         npub: botData.npub,
         webxPort: webxPort,
+        smbPort: SMBPORT,
         saveDir: saveDir,
         usedSpace: saveDirSize,
         usedSpaceFormatted: bytesToSize(saveDirSize),
