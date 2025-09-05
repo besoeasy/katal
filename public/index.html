@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostr Aria Bot - Dashboard</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'nostr-orange': '#ff6b35',
+                        'dark-bg': '#1a1a1a',
+                        'card-bg': '#2a2a2a',
+                        'border-color': '#333333'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom styles for animations -->
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px #ff6b35; }
+            50% { box-shadow: 0 0 20px #ff6b35, 0 0 30px #ff6b35; }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, #ff6b35, #f39c12);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-dark-bg text-white font-sans">
+    <div id="app">
+        <!-- Loading Screen -->
+        <div v-if="isLoading" class="min-h-screen flex items-center justify-center">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-nostr-orange mx-auto mb-4"></div>
+                <p class="text-gray-400">Loading dashboard...</p>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div v-else class="min-h-screen p-4 lg:p-8">
+            <div class="max-w-7xl mx-auto">
+                
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl lg:text-5xl font-bold gradient-text mb-4">
+                        🤖 Nostr Aria Bot Dashboard
+                    </h1>
+                    <div class="flex items-center justify-center space-x-4 mb-4">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                            <span class="text-green-400 font-semibold">{{ connectionStatus }}</span>
+                        </div>
+                        <div class="text-gray-400">|</div>
+                        <div class="text-gray-400">
+                            Last updated: {{ formatTime(lastUpdated) }}
+                        </div>
+                    </div>
+                    
+                    <!-- Auto-refresh indicator -->
+                    <div class="flex items-center justify-center space-x-2 text-sm text-gray-400">
+                        <div class="w-2 h-2 bg-nostr-orange rounded-full animate-pulse"></div>
+                        <span>Auto-refreshing in {{ countdown }}s</span>
+                        <button 
+                            @click="fetchData" 
+                            class="ml-4 px-4 py-2 bg-nostr-orange hover:bg-orange-600 rounded-lg transition-all duration-200 text-white font-semibold transform hover:scale-105"
+                        >
+                            🔄 Refresh Now
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Cards Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    
+                    <!-- Bot Identity Card -->
+                    <div class="bg-card-bg border border-border-color rounded-xl p-6 card-hover">
+                        <h3 class="text-xl font-bold text-nostr-orange mb-4 flex items-center">
+                            🔑 Bot Identity
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-gray-400 text-sm">Public Key (hex)</label>
+                                <div class="bg-gray-800 rounded-lg p-3 mt-1 font-mono text-xs break-all">
+                                    {{ botData.pubkey }}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="text-gray-400 text-sm">Public Key (npub)</label>
+                                <div class="bg-gray-800 rounded-lg p-3 mt-1 font-mono text-xs break-all">
+                                    {{ botData.npub }}
+                                </div>
+                            </div>
+                            
+                            <div class="text-center pt-4">
+                                <div class="inline-block p-4 bg-white rounded-xl">
+                                    <img 
+                                        :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(botData.npub)}`"
+                                        alt="NPUB QR Code"
+                                        class="w-32 h-32"
+                                    >
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2">Scan to connect on Nostr</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Server Info Card -->
+                    <div class="bg-card-bg border border-border-color rounded-xl p-6 card-hover">
+                        <h3 class="text-xl font-bold text-nostr-orange mb-4 flex items-center">
+                            🌐 Server Info
+                        </h3>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Web Dashboard Port</span>
+                                <span class="font-mono text-green-400">6798</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">File Server Port</span>
+                                <span class="font-mono text-blue-400">{{ botData.webxPort }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Save Directory</span>
+                                <span class="font-mono text-purple-400 text-sm">{{ botData.saveDir }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Used Space</span>
+                                <span class="font-mono text-yellow-400">{{ botData.usedSpaceFormatted }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-gray-400">Uptime</span>
+                                <span class="font-mono text-cyan-400">{{ formatUptime(botData.uptime) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aria2 Stats Card -->
+                    <div class="bg-card-bg border border-border-color rounded-xl p-6 card-hover">
+                        <h3 class="text-xl font-bold text-nostr-orange mb-4 flex items-center">
+                            📊 Aria2 Stats
+                        </h3>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Download Speed</span>
+                                <span class="font-mono text-green-400">{{ formatSpeed(botData.aria2Stats?.downloadSpeed) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Upload Speed</span>
+                                <span class="font-mono text-blue-400">{{ formatSpeed(botData.aria2Stats?.uploadSpeed) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Active Downloads</span>
+                                <span class="font-mono text-red-400">{{ botData.aria2Stats?.numActive || 0 }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                <span class="text-gray-400">Waiting Downloads</span>
+                                <span class="font-mono text-yellow-400">{{ botData.aria2Stats?.numWaiting || 0 }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-gray-400">Stopped Downloads</span>
+                                <span class="font-mono text-gray-400">{{ botData.aria2Stats?.numStopped || 0 }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Download Progress Indicator -->
+                        <div class="mt-4 p-3 bg-gray-800 rounded-lg">
+                            <div class="flex justify-between text-sm mb-2">
+                                <span>Total Downloads</span>
+                                <span>{{ getTotalDownloads() }}</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div 
+                                    class="bg-gradient-to-r from-nostr-orange to-yellow-500 h-2 rounded-full transition-all duration-500"
+                                    :style="{ width: getDownloadProgress() + '%' }"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Info Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    
+                    <!-- Connection Status -->
+                    <div class="bg-card-bg border border-border-color rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-nostr-orange mb-4">📡 Connection Status</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-4 h-4 bg-green-500 rounded-full pulse-glow"></div>
+                                <span>Web Server: Online</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-4 h-4 bg-green-500 rounded-full pulse-glow"></div>
+                                <span>API Server: Online</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div :class="isAriaOnline() ? 'bg-green-500 pulse-glow' : 'bg-red-500'" class="w-4 h-4 rounded-full"></div>
+                                <span>Aria2 RPC: {{ isAriaOnline() ? 'Connected' : 'Disconnected' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-card-bg border border-border-color rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-nostr-orange mb-4">⚡ Quick Actions</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <a 
+                                :href="`http://localhost:${botData.webxPort}`" 
+                                target="_blank"
+                                class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg text-center transition-all duration-200 transform hover:scale-105"
+                            >
+                                📁 File Server
+                            </a>
+                            <button 
+                                @click="copyToClipboard(botData.npub)"
+                                class="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-lg transition-all duration-200 transform hover:scale-105"
+                            >
+                                📋 Copy NPUB
+                            </button>
+                            <button 
+                                @click="showQRCode = !showQRCode"
+                                class="bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg transition-all duration-200 transform hover:scale-105"
+                            >
+                                📱 Toggle QR
+                            </button>
+                            <button 
+                                @click="fetchData"
+                                class="bg-nostr-orange hover:bg-orange-600 text-white p-3 rounded-lg transition-all duration-200 transform hover:scale-105"
+                            >
+                                🔄 Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center mt-8 text-gray-500 text-sm">
+                    <p>🤖 Nostr Aria Bot Dashboard • Auto-refresh: 10s • Built with Tailwind CSS & Vue.js</p>
+                    <p class="mt-1">Server Time: {{ new Date().toLocaleString() }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div v-if="showToast" class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform">
+            {{ toastMessage }}
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    botData: {},
+                    isLoading: true,
+                    lastUpdated: null,
+                    countdown: 10,
+                    connectionStatus: 'Connecting...',
+                    showQRCode: false,
+                    showToast: false,
+                    toastMessage: '',
+                    refreshInterval: null,
+                    countdownInterval: null
+                }
+            },
+            
+            async mounted() {
+                await this.fetchData();
+                this.startAutoRefresh();
+            },
+            
+            beforeUnmount() {
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                }
+                if (this.countdownInterval) {
+                    clearInterval(this.countdownInterval);
+                }
+            },
+            
+            methods: {
+                async fetchData() {
+                    try {
+                        this.connectionStatus = 'Fetching data...';
+                        const response = await fetch('/api/status');
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        this.botData = await response.json();
+                        this.lastUpdated = new Date();
+                        this.connectionStatus = 'Connected';
+                        this.isLoading = false;
+                        
+                        // Reset countdown
+                        this.countdown = 10;
+                        
+                    } catch (error) {
+                        console.error('Failed to fetch data:', error);
+                        this.connectionStatus = 'Connection Error';
+                        this.showToastMessage(`Error: ${error.message}`);
+                        
+                        // Still show some data if we have it
+                        if (this.isLoading) {
+                            this.botData = {
+                                pubkey: 'Error loading...',
+                                npub: 'Error loading...',
+                                webxPort: 'N/A',
+                                saveDir: 'N/A',
+                                usedSpaceFormatted: 'N/A',
+                                uptime: 0,
+                                aria2Stats: {}
+                            };
+                            this.isLoading = false;
+                        }
+                    }
+                },
+                
+                startAutoRefresh() {
+                    // Refresh data every 10 seconds
+                    this.refreshInterval = setInterval(() => {
+                        this.fetchData();
+                    }, 10000);
+                    
+                    // Update countdown every second
+                    this.countdownInterval = setInterval(() => {
+                        this.countdown--;
+                        if (this.countdown <= 0) {
+                            this.countdown = 10;
+                        }
+                    }, 1000);
+                },
+                
+                formatTime(date) {
+                    if (!date) return 'Never';
+                    return date.toLocaleTimeString();
+                },
+                
+                formatUptime(seconds) {
+                    if (!seconds) return '0m';
+                    const hours = Math.floor(seconds / 3600);
+                    const minutes = Math.floor((seconds % 3600) / 60);
+                    
+                    if (hours > 0) {
+                        return `${hours}h ${minutes}m`;
+                    } else {
+                        return `${minutes}m`;
+                    }
+                },
+                
+                formatSpeed(speed) {
+                    if (!speed) return '0 B/s';
+                    
+                    // If speed is already formatted (contains '/s'), return as is
+                    if (typeof speed === 'string' && speed.includes('/s')) {
+                        return speed;
+                    }
+                    
+                    // If speed is a number, format it
+                    if (typeof speed === 'number') {
+                        const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
+                        let size = speed;
+                        let unitIndex = 0;
+                        
+                        while (size >= 1024 && unitIndex < units.length - 1) {
+                            size /= 1024;
+                            unitIndex++;
+                        }
+                        
+                        return `${size.toFixed(1)} ${units[unitIndex]}`;
+                    }
+                    
+                    return speed || '0 B/s';
+                },
+                
+                getTotalDownloads() {
+                    const stats = this.botData.aria2Stats || {};
+                    return (parseInt(stats.numActive || 0) + 
+                            parseInt(stats.numWaiting || 0) + 
+                            parseInt(stats.numStopped || 0));
+                },
+                
+                getDownloadProgress() {
+                    const stats = this.botData.aria2Stats || {};
+                    const total = this.getTotalDownloads();
+                    const completed = parseInt(stats.numStopped || 0);
+                    
+                    if (total === 0) return 0;
+                    return Math.round((completed / total) * 100);
+                },
+                
+                isAriaOnline() {
+                    const stats = this.botData.aria2Stats || {};
+                    return stats.downloadSpeed !== undefined || stats.uploadSpeed !== undefined;
+                },
+                
+                async copyToClipboard(text) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        this.showToastMessage('NPUB copied to clipboard!');
+                    } catch (error) {
+                        console.error('Failed to copy:', error);
+                        this.showToastMessage('Failed to copy to clipboard');
+                    }
+                },
+                
+                showToastMessage(message) {
+                    this.toastMessage = message;
+                    this.showToast = true;
+                    
+                    setTimeout(() => {
+                        this.showToast = false;
+                    }, 3000);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
