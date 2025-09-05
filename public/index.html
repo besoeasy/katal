@@ -17,387 +17,307 @@
             theme: {
                 extend: {
                     colors: {
-                        'nostr-orange': '#ff6b35',
-                        'dark-bg': '#0f0f0f',
-                        'card-bg': '#1a1a1a',
-                        'border-color': '#333333'
+                        'primary': '#3b82f6',
+                        'accent': '#10b981',
+                        'surface': '#f8fafc',
+                        'card': '#ffffff',
+                        'border': '#e2e8f0'
                     },
-                    animation: {
-                        'fade-in': 'fadeIn 0.6s ease-out',
-                        'slide-up': 'slideUp 0.8s ease-out',
-                        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
-                        'bounce-in': 'bounceIn 0.6s ease-out',
-                        'scale-in': 'scaleIn 0.4s ease-out'
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
                     }
                 }
             }
         }
     </script>
     
-    <!-- Enhanced animations and styles -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom styles -->
     <style>
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(30px); 
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
         
-        @keyframes pulseGlow {
-            0%, 100% { 
-                box-shadow: 0 0 5px #ff6b35; 
-                transform: scale(1);
-            }
-            50% { 
-                box-shadow: 0 0 20px #ff6b35, 0 0 30px #ff6b35; 
-                transform: scale(1.05);
-            }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         
-        @keyframes bounceIn {
-            0% { 
-                opacity: 0; 
-                transform: scale(0.3); 
-            }
-            50% { 
-                opacity: 1; 
-                transform: scale(1.05); 
-            }
-            70% { 
-                transform: scale(0.9); 
-            }
-            100% { 
-                opacity: 1; 
-                transform: scale(1); 
-            }
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
         }
         
-        @keyframes scaleIn {
-            from { 
-                opacity: 0; 
-                transform: scale(0.9); 
-            }
-            to { 
-                opacity: 1; 
-                transform: scale(1); 
-            }
+        .pulse-soft {
+            animation: pulse-soft 2s ease-in-out infinite;
         }
         
-        .gradient-text {
-            background: linear-gradient(45deg, #ff6b35, #f39c12, #e74c3c);
-            background-size: 200% 200%;
+        .card-elegant {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-elegant:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: gradientShift 3s ease-in-out infinite;
-        }
-        
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
-        .card-hover {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(255, 107, 53, 0.2);
-        }
-        
-        .glass-effect {
-            backdrop-filter: blur(10px);
-            background: rgba(26, 26, 26, 0.8);
-        }
-        
-        .status-indicator {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .status-indicator::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: shimmer 2s infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
         }
     </style>
 </head>
-<body class="bg-dark-bg text-white font-sans overflow-x-hidden">
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen font-sans">
     <div id="app">
-        <!-- Loading Screen with enhanced animation -->
-        <div v-if="isLoading" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-dark-bg to-gray-900">
-            <div class="text-center animate-bounce-in">
-                <div class="relative">
-                    <div class="animate-spin rounded-full h-20 w-20 border-4 border-transparent border-t-nostr-orange border-r-orange-400 mx-auto mb-6"></div>
-                    <div class="absolute inset-0 animate-ping rounded-full h-20 w-20 border-2 border-nostr-orange opacity-20 mx-auto"></div>
-                </div>
-                <p class="text-gray-400 text-lg animate-pulse">Initializing dashboard...</p>
+        <!-- Loading Screen -->
+        <div v-if="isLoading" class="min-h-screen flex items-center justify-center">
+            <div class="text-center">
+                <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="text-slate-600 font-medium">Loading dashboard...</p>
             </div>
         </div>
 
         <!-- Main Dashboard -->
-        <div v-else class="min-h-screen p-4 lg:p-8 animate-fade-in">
-            <div class="max-w-7xl mx-auto space-y-8">
+        <div v-else class="min-h-screen p-6 lg:p-8">
+            <div class="max-w-7xl mx-auto">
                 
-                <!-- Hero Header -->
-                <div class="text-center animate-slide-up">
-                    <div class="inline-block p-6 rounded-2xl glass-effect border border-nostr-orange/20 mb-6">
-                        <h1 class="text-5xl lg:text-7xl font-bold gradient-text mb-4">
-                            🤖 Katal Bot
-                        </h1>
-                        <p class="text-xl text-gray-300 mb-6">Nostr Download Assistant Dashboard</p>
-                        
-                        <div class="flex flex-wrap items-center justify-center gap-6 mb-6">
-                            <div class="flex items-center space-x-3 bg-green-900/30 px-4 py-2 rounded-full border border-green-500/30">
-                                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse-glow"></div>
-                                <span class="text-green-400 font-semibold">{{ connectionStatus }}</span>
-                            </div>
-                            <div class="text-gray-400 text-sm">
-                                Last sync: {{ formatTime(lastUpdated) }}
-                            </div>
+                <!-- Header -->
+                <div class="text-center mb-12 fade-in-up">
+                    <h1 class="text-5xl lg:text-6xl font-bold text-gradient mb-6 uppercase">
+                        Katal Bot
+                    </h1>
+                    <div class="flex items-center justify-center space-x-6 mb-6">
+                        <div class="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-border">
+                            <div class="w-3 h-3 bg-accent rounded-full pulse-soft mr-3"></div>
+                            <span class="text-accent font-semibold">{{ connectionStatus }}</span>
                         </div>
-                        
-                        <!-- Auto-refresh with enhanced styling -->
-                        <div class="flex items-center justify-center space-x-4">
-                            <div class="flex items-center space-x-2 text-sm text-gray-400 bg-gray-800/50 px-4 py-2 rounded-full">
-                                <div class="w-2 h-2 bg-nostr-orange rounded-full animate-pulse"></div>
-                                <span>Auto-refresh in {{ countdown }}s</span>
-                            </div>
-                            <button 
-                                @click="fetchData" 
-                                class="px-6 py-3 bg-gradient-to-r from-nostr-orange to-orange-600 hover:from-orange-600 hover:to-red-500 rounded-full transition-all duration-300 text-white font-semibold transform hover:scale-110 shadow-lg hover:shadow-xl"
-                            >
-                                🔄 Refresh Now
-                            </button>
+                        <div class="text-slate-500 font-medium">
+                            {{ formatTime(lastUpdated) }}
                         </div>
+                    </div>
+                    
+                    <!-- Auto-refresh indicator -->
+                    <div class="flex items-center justify-center space-x-4">
+                        <div class="flex items-center space-x-2 text-slate-500">
+                            <div class="w-2 h-2 bg-primary rounded-full pulse-soft"></div>
+                            <span class="text-sm font-medium">Refreshing in {{ countdown }}s</span>
+                        </div>
+                        <button 
+                            @click="fetchData" 
+                            class="px-6 py-2 bg-primary hover:bg-blue-600 text-white rounded-full font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        >
+                            Refresh Now
+                        </button>
                     </div>
                 </div>
 
-                <!-- Status Cards Grid with staggered animation -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Status Cards Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                     
                     <!-- Bot Identity Card -->
-                    <div class="glass-effect border border-border-color rounded-2xl p-8 card-hover animate-slide-up" style="animation-delay: 0.1s">
-                        <div class="flex items-center mb-6">
-                            <div class="w-12 h-12 bg-gradient-to-br from-nostr-orange to-orange-600 rounded-xl flex items-center justify-center text-2xl mr-4">
-                                🔑
-                            </div>
-                            <h3 class="text-2xl font-bold text-nostr-orange">Bot Identity</h3>
-                        </div>
+                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.1s">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                            <span class="text-2xl mr-3">🔑</span>
+                            Bot Identity
+                        </h3>
                         
                         <div class="space-y-6">
-                            <div class="animate-scale-in" style="animation-delay: 0.3s">
-                                <label class="text-gray-400 text-sm font-medium">Public Key (hex)</label>
-                                <div class="bg-gray-900/50 border border-gray-700 rounded-xl p-4 mt-2 font-mono text-xs break-all hover:bg-gray-800/50 transition-colors">
+                            <div>
+                                <label class="text-slate-500 text-sm font-medium">Public Key (hex)</label>
+                                <div class="bg-slate-50 rounded-xl p-4 mt-2 font-mono text-xs break-all border border-slate-200">
                                     {{ botData.pubkey }}
                                 </div>
                             </div>
                             
-                            <div class="animate-scale-in" style="animation-delay: 0.4s">
-                                <label class="text-gray-400 text-sm font-medium">Public Key (npub)</label>
-                                <div class="bg-gray-900/50 border border-gray-700 rounded-xl p-4 mt-2 font-mono text-xs break-all hover:bg-gray-800/50 transition-colors">
+                            <div>
+                                <label class="text-slate-500 text-sm font-medium">Public Key (npub)</label>
+                                <div class="bg-slate-50 rounded-xl p-4 mt-2 font-mono text-xs break-all border border-slate-200">
                                     {{ botData.npub }}
                                 </div>
                             </div>
                             
-                            <div class="text-center pt-6 animate-bounce-in" style="animation-delay: 0.5s">
-                                <div class="inline-block p-4 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+                            <div class="text-center pt-4">
+                                <div class="inline-block p-6 bg-white rounded-2xl shadow-lg border border-slate-200">
                                     <img 
                                         :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(botData.npub)}`"
                                         alt="NPUB QR Code"
-                                        class="w-32 h-32"
+                                        class="w-32 h-32 rounded-lg"
                                     >
                                 </div>
-                                <p class="text-xs text-gray-400 mt-3">Scan to connect with Katal on Nostr</p>
+                                <p class="text-xs text-slate-500 mt-3 font-medium">Scan to connect with Katal on Nostr</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Server Info Card -->
-                    <div class="glass-effect border border-border-color rounded-2xl p-8 card-hover animate-slide-up" style="animation-delay: 0.2s">
-                        <div class="flex items-center mb-6">
-                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-2xl mr-4">
-                                🌐
-                            </div>
-                            <h3 class="text-2xl font-bold text-nostr-orange">Server Info</h3>
-                        </div>
+                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.2s">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                            <span class="text-2xl mr-3">🌐</span>
+                            Server Info
+                        </h3>
                         
                         <div class="space-y-4">
-                            <div class="flex justify-between items-center py-3 border-b border-gray-700/50 status-indicator">
-                                <span class="text-gray-300 font-medium">Web Dashboard</span>
-                                <span class="font-mono text-green-400 bg-green-900/30 px-3 py-1 rounded-full">6798</span>
+                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                                <span class="text-slate-600 font-medium">Web Dashboard Port</span>
+                                <span class="font-mono text-accent font-semibold">6798</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-gray-700/50 status-indicator">
-                                <span class="text-gray-300 font-medium">File Server</span>
-                                <span class="font-mono text-blue-400 bg-blue-900/30 px-3 py-1 rounded-full">{{ botData.webxPort }}</span>
+                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                                <span class="text-slate-600 font-medium">File Server Port</span>
+                                <span class="font-mono text-primary font-semibold">{{ botData.webxPort }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-gray-700/50 status-indicator">
-                                <span class="text-gray-300 font-medium">Save Directory</span>
-                                <span class="font-mono text-purple-400 text-sm bg-purple-900/30 px-3 py-1 rounded-full">{{ botData.saveDir }}</span>
+                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                                <span class="text-slate-600 font-medium">Save Directory</span>
+                                <span class="font-mono text-purple-600 text-sm font-semibold">{{ botData.saveDir }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-gray-700/50 status-indicator">
-                                <span class="text-gray-300 font-medium">Used Space</span>
-                                <span class="font-mono text-yellow-400 bg-yellow-900/30 px-3 py-1 rounded-full">{{ botData.usedSpaceFormatted }}</span>
+                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                                <span class="text-slate-600 font-medium">Used Space</span>
+                                <span class="font-mono text-orange-500 font-semibold">{{ botData.usedSpaceFormatted }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 status-indicator">
-                                <span class="text-gray-300 font-medium">Uptime</span>
-                                <span class="font-mono text-cyan-400 bg-cyan-900/30 px-3 py-1 rounded-full">{{ formatUptime(botData.uptime) }}</span>
+                            <div class="flex justify-between items-center py-3">
+                                <span class="text-slate-600 font-medium">Uptime</span>
+                                <span class="font-mono text-cyan-600 font-semibold">{{ formatUptime(botData.uptime) }}</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Aria2 Stats Card -->
-                    <div class="glass-effect border border-border-color rounded-2xl p-8 card-hover animate-slide-up" style="animation-delay: 0.3s">
-                        <div class="flex items-center mb-6">
-                            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center text-2xl mr-4">
-                                📊
+                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.3s">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                            <span class="text-2xl mr-3">📊</span>
+                            Aria2 Stats
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                                <span class="text-slate-600 font-medium">Download Speed</span>
+                                <span class="font-mono text-accent font-semibold">{{ formatSpeed(botData.aria2Stats?.downloadSpeed) }}</span>
                             </div>
-                            <h3 class="text-2xl font-bold text-nostr-orange">Aria2 Stats</h3>
+                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                                <span class="text-slate-600 font-medium">Upload Speed</span>
+                                <span class="font-mono text-primary font-semibold">{{ formatSpeed(botData.aria2Stats?.uploadSpeed) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                                <span class="text-slate-600 font-medium">Active Downloads</span>
+                                <span class="font-mono text-red-500 font-semibold">{{ botData.aria2Stats?.numActive || 0 }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                                <span class="text-slate-600 font-medium">Waiting Downloads</span>
+                                <span class="font-mono text-yellow-600 font-semibold">{{ botData.aria2Stats?.numWaiting || 0 }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-3">
+                                <span class="text-slate-600 font-medium">Stopped Downloads</span>
+                                <span class="font-mono text-slate-500 font-semibold">{{ botData.aria2Stats?.numStopped || 0 }}</span>
+                            </div>
                         </div>
                         
-                        <div class="space-y-4 mb-6">
-                            <div class="flex justify-between items-center py-3 border-b border-gray-700/50 status-indicator">
-                                <span class="text-gray-300 font-medium">Download Speed</span>
-                                <span class="font-mono text-green-400 bg-green-900/30 px-3 py-1 rounded-full">{{ formatSpeed(botData.aria2Stats?.downloadSpeed) }}</span>
+                        <!-- Download Progress Indicator -->
+                        <div class="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <div class="flex justify-between text-sm mb-3 font-medium text-slate-600">
+                                <span>Total Downloads</span>
+                                <span>{{ getTotalDownloads() }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-gray-700/50 status-indicator">
-                                <span class="text-gray-300 font-medium">Upload Speed</span>
-                                <span class="font-mono text-blue-400 bg-blue-900/30 px-3 py-1 rounded-full">{{ formatSpeed(botData.aria2Stats?.uploadSpeed) }}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-3 border-b border-gray-700/50 status-indicator">
-                                <span class="text-gray-300 font-medium">Active</span>
-                                <span class="font-mono text-red-400 bg-red-900/30 px-3 py-1 rounded-full">{{ botData.aria2Stats?.numActive || 0 }}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-3 border-b border-gray-700/50 status-indicator">
-                                <span class="text-gray-300 font-medium">Waiting</span>
-                                <span class="font-mono text-yellow-400 bg-yellow-900/30 px-3 py-1 rounded-full">{{ botData.aria2Stats?.numWaiting || 0 }}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-3 status-indicator">
-                                <span class="text-gray-300 font-medium">Completed</span>
-                                <span class="font-mono text-gray-400 bg-gray-700/30 px-3 py-1 rounded-full">{{ botData.aria2Stats?.numStopped || 0 }}</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Enhanced Progress Indicator -->
-                        <div class="bg-gray-900/50 border border-gray-700 rounded-xl p-4">
-                            <div class="flex justify-between text-sm mb-3">
-                                <span class="text-gray-300 font-medium">Total Downloads</span>
-                                <span class="text-nostr-orange font-bold">{{ getTotalDownloads() }}</span>
-                            </div>
-                            <div class="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                            <div class="w-full bg-slate-200 rounded-full h-3">
                                 <div 
-                                    class="bg-gradient-to-r from-nostr-orange via-orange-500 to-yellow-500 h-3 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+                                    class="bg-gradient-to-r from-primary to-accent h-3 rounded-full transition-all duration-700 ease-out"
                                     :style="{ width: getDownloadProgress() + '%' }"
-                                >
-                                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
-                                </div>
-                            </div>
-                            <div class="text-xs text-gray-400 mt-2 text-center">
-                                {{ getDownloadProgress() }}% Complete
+                                ></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Security Section with enhanced styling -->
-                <div class="glass-effect border border-red-500/50 rounded-2xl p-8 animate-slide-up" style="animation-delay: 0.4s">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center text-2xl mr-4">
-                            🔐
-                        </div>
-                        <h3 class="text-2xl font-bold text-red-400">Bot Access Control</h3>
-                    </div>
+                <!-- Security & Access Section -->
+                <div class="card-elegant rounded-2xl p-8 mb-8 border-red-200 fade-in-up" style="animation-delay: 0.4s">
+                    <h3 class="text-2xl font-bold text-red-600 mb-6 flex items-center">
+                        <span class="text-2xl mr-3">🔐</span>
+                        Bot Access Control
+                    </h3>
                     
-                    <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-6 mb-8">
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
                         <div class="flex items-center space-x-3 mb-3">
-                            <div class="w-4 h-4 bg-red-500 rounded-full animate-pulse-glow"></div>
-                            <span class="text-red-200 font-semibold text-lg">Security Notice</span>
+                            <div class="w-3 h-3 bg-red-500 rounded-full pulse-soft"></div>
+                            <span class="text-red-700 font-semibold">Security Notice</span>
                         </div>
-                        <p class="text-red-200">
+                        <p class="text-red-600 text-sm leading-relaxed">
                             This bot requires authorization to prevent unauthorized downloads. 
                             Users must provide the unlock code to gain access.
                         </p>
                     </div>
                     
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="space-y-6">
                             <div>
-                                <label class="text-gray-300 font-medium mb-3 block">Current Unlock Code</label>
-                                <div class="bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border border-yellow-500/50 rounded-xl p-6 relative overflow-hidden">
-                                    <div class="font-mono text-3xl text-yellow-400 text-center tracking-wider font-bold">
+                                <label class="text-slate-600 text-sm font-semibold">Current Unlock Code</label>
+                                <div class="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-6 mt-3 relative">
+                                    <div class="font-mono text-3xl text-yellow-700 text-center tracking-wider font-bold">
                                         {{ botData.unlockCode }}
                                     </div>
                                     <button 
                                         @click="copyToClipboard(botData.unlockCode)"
-                                        class="absolute top-3 right-3 text-gray-400 hover:text-yellow-400 transition-colors transform hover:scale-110"
+                                        class="absolute top-3 right-3 text-yellow-600 hover:text-yellow-800 transition-colors p-2 hover:bg-yellow-100 rounded-lg"
                                         title="Copy unlock code"
                                     >
                                         📋
                                     </button>
-                                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-500/5 to-transparent animate-pulse"></div>
                                 </div>
                             </div>
                             
-                            <div class="bg-gray-800/30 rounded-xl p-4">
-                                <div class="text-sm text-gray-300 space-y-2">
-                                    <p class="flex items-center"><span class="text-green-400 mr-2">✓</span> Share this code with authorized users</p>
-                                    <p class="flex items-center"><span class="text-green-400 mr-2">✓</span> Code is required for first-time access</p>
-                                    <p class="flex items-center"><span class="text-green-400 mr-2">✓</span> Once authorized, users remain whitelisted</p>
-                                </div>
+                            <div class="text-sm text-slate-500 space-y-2 bg-slate-50 p-4 rounded-xl">
+                                <p class="flex items-center"><span class="text-accent mr-2">•</span> Share this code with authorized users</p>
+                                <p class="flex items-center"><span class="text-accent mr-2">•</span> Code is required for first-time access</p>
+                                <p class="flex items-center"><span class="text-accent mr-2">•</span> Once authorized, users remain whitelisted</p>
                             </div>
                         </div>
                         
                         <div class="space-y-6">
                             <div>
-                                <label class="text-gray-300 font-medium mb-3 block">Authorization Steps</label>
-                                <div class="bg-gray-800/30 rounded-xl p-6">
-                                    <ol class="space-y-3 text-gray-300">
+                                <label class="text-slate-600 text-sm font-semibold">Authorization Instructions</label>
+                                <div class="bg-slate-50 rounded-xl p-6 mt-3 border border-slate-200">
+                                    <ol class="space-y-3 text-sm text-slate-600">
                                         <li class="flex items-start">
-                                            <span class="bg-nostr-orange text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">1</span>
+                                            <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</span>
                                             Send a DM to the bot's npub
                                         </li>
                                         <li class="flex items-start">
-                                            <span class="bg-nostr-orange text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">2</span>
+                                            <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</span>
                                             Bot will request unlock code
                                         </li>
                                         <li class="flex items-start">
-                                            <span class="bg-nostr-orange text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">3</span>
-                                            Reply with: <code class="bg-gray-700 px-2 py-1 rounded text-yellow-400 ml-1">{{ botData.unlockCode }}</code>
+                                            <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3</span>
+                                            Reply with: <code class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-mono text-xs ml-1">{{ botData.unlockCode }}</code>
                                         </li>
                                         <li class="flex items-start">
-                                            <span class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">✓</span>
+                                            <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">4</span>
                                             Access granted! Use "help" for commands
                                         </li>
                                     </ol>
                                 </div>
                             </div>
                             
-                            <div class="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/30 rounded-xl p-6 text-center">
-                                <div class="flex items-center justify-center space-x-3 text-green-200 mb-2">
-                                    <span class="text-2xl">👥</span>
-                                    <span class="font-medium">Authorized Users</span>
+                            <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+                                <div class="flex items-center space-x-3 text-green-700 mb-2">
+                                    <span class="text-xl">👥</span>
+                                    <span class="font-semibold">Authorized Users</span>
                                 </div>
-                                <div class="text-4xl text-green-400 font-mono font-bold">
+                                <div class="text-3xl text-green-600 font-bold font-mono">
                                     {{ botData.whitelistCount || 0 }}
                                 </div>
                             </div>
@@ -405,26 +325,27 @@
                     </div>
                 </div>
 
-                <!-- Quick Actions Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-slide-up" style="animation-delay: 0.5s">
+                <!-- Additional Info Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     
                     <!-- Connection Status -->
-                    <div class="glass-effect border border-border-color rounded-2xl p-8">
-                        <h3 class="text-2xl font-bold text-nostr-orange mb-6 flex items-center">
-                            <span class="text-3xl mr-3">📡</span> Connection Status
+                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.5s">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                            <span class="text-2xl mr-3">📡</span>
+                            Connection Status
                         </h3>
                         <div class="space-y-4">
-                            <div class="flex items-center space-x-4 p-4 bg-green-900/20 border border-green-500/30 rounded-xl">
-                                <div class="w-6 h-6 bg-green-500 rounded-full animate-pulse-glow"></div>
-                                <span class="text-green-300 font-medium">Web Server: Online</span>
+                            <div class="flex items-center space-x-4 p-3 bg-green-50 rounded-xl">
+                                <div class="w-4 h-4 bg-accent rounded-full pulse-soft"></div>
+                                <span class="text-slate-700 font-medium">Web Server: Online</span>
                             </div>
-                            <div class="flex items-center space-x-4 p-4 bg-green-900/20 border border-green-500/30 rounded-xl">
-                                <div class="w-6 h-6 bg-green-500 rounded-full animate-pulse-glow"></div>
-                                <span class="text-green-300 font-medium">API Server: Online</span>
+                            <div class="flex items-center space-x-4 p-3 bg-green-50 rounded-xl">
+                                <div class="w-4 h-4 bg-accent rounded-full pulse-soft"></div>
+                                <span class="text-slate-700 font-medium">API Server: Online</span>
                             </div>
-                            <div class="flex items-center space-x-4 p-4 rounded-xl" :class="isAriaOnline() ? 'bg-green-900/20 border border-green-500/30' : 'bg-red-900/20 border border-red-500/30'">
-                                <div :class="isAriaOnline() ? 'bg-green-500 animate-pulse-glow' : 'bg-red-500'" class="w-6 h-6 rounded-full"></div>
-                                <span :class="isAriaOnline() ? 'text-green-300' : 'text-red-300'" class="font-medium">
+                            <div class="flex items-center space-x-4 p-3 rounded-xl" :class="isAriaOnline() ? 'bg-green-50' : 'bg-red-50'">
+                                <div :class="isAriaOnline() ? 'bg-accent pulse-soft' : 'bg-red-500'" class="w-4 h-4 rounded-full"></div>
+                                <span class="font-medium" :class="isAriaOnline() ? 'text-slate-700' : 'text-red-600'">
                                     Aria2 RPC: {{ isAriaOnline() ? 'Connected' : 'Disconnected' }}
                                 </span>
                             </div>
@@ -432,39 +353,36 @@
                     </div>
 
                     <!-- Quick Actions -->
-                    <div class="glass-effect border border-border-color rounded-2xl p-8">
-                        <h3 class="text-2xl font-bold text-nostr-orange mb-6 flex items-center">
-                            <span class="text-3xl mr-3">⚡</span> Quick Actions
+                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.6s">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                            <span class="text-2xl mr-3">⚡</span>
+                            Quick Actions
                         </h3>
                         <div class="grid grid-cols-2 gap-4">
                             <a 
                                 :href="`http://localhost:${botData.webxPort}`" 
                                 target="_blank"
-                                class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white p-4 rounded-xl text-center transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                                class="bg-primary hover:bg-blue-600 text-white p-4 rounded-xl text-center transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
                             >
-                                <div class="text-2xl mb-2">📁</div>
-                                <div class="font-semibold">File Server</div>
+                                📁 File Server
                             </a>
                             <button 
                                 @click="copyToClipboard(botData.npub)"
-                                class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                                class="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
                             >
-                                <div class="text-2xl mb-2">📋</div>
-                                <div class="font-semibold">Copy NPUB</div>
+                                📋 Copy NPUB
                             </button>
                             <button 
                                 @click="showQRCode = !showQRCode"
-                                class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white p-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                                class="bg-accent hover:bg-green-600 text-white p-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
                             >
-                                <div class="text-2xl mb-2">📱</div>
-                                <div class="font-semibold">Toggle QR</div>
+                                📱 Toggle QR
                             </button>
                             <button 
                                 @click="fetchData"
-                                class="bg-gradient-to-r from-nostr-orange to-orange-600 hover:from-orange-600 hover:to-red-500 text-white p-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                                class="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
                             >
-                                <div class="text-2xl mb-2">🔄</div>
-                                <div class="font-semibold">Refresh</div>
+                                🔄 Refresh
                             </button>
                         </div>
                     </div>
@@ -472,12 +390,10 @@
             </div>
         </div>
 
-        <!-- Enhanced Toast Notifications -->
-        <div v-if="showToast" class="fixed bottom-6 right-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-2xl shadow-2xl transition-all duration-500 transform animate-bounce-in border border-green-400/30">
+        <!-- Toast Notifications -->
+        <div v-if="showToast" class="fixed bottom-6 right-6 bg-white border border-green-200 text-green-800 px-6 py-4 rounded-xl shadow-2xl transition-all duration-300 transform">
             <div class="flex items-center space-x-3">
-                <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                    ✓
-                </div>
+                <div class="w-2 h-2 bg-accent rounded-full"></div>
                 <span class="font-medium">{{ toastMessage }}</span>
             </div>
         </div>
@@ -531,7 +447,6 @@
                         this.connectionStatus = 'Connected';
                         this.isLoading = false;
                         
-                        // Reset countdown
                         this.countdown = 10;
                         
                     } catch (error) {
@@ -539,7 +454,6 @@
                         this.connectionStatus = 'Connection Error';
                         this.showToastMessage(`Error: ${error.message}`);
                         
-                        // Still show some data if we have it
                         if (this.isLoading) {
                             this.botData = {
                                 pubkey: 'Error loading...',
@@ -548,7 +462,6 @@
                                 saveDir: 'N/A',
                                 usedSpaceFormatted: 'N/A',
                                 uptime: 0,
-                                unlockCode: 'N/A',
                                 aria2Stats: {}
                             };
                             this.isLoading = false;
@@ -557,12 +470,10 @@
                 },
                 
                 startAutoRefresh() {
-                    // Refresh data every 10 seconds
                     this.refreshInterval = setInterval(() => {
                         this.fetchData();
                     }, 10000);
                     
-                    // Update countdown every second
                     this.countdownInterval = setInterval(() => {
                         this.countdown--;
                         if (this.countdown <= 0) {
@@ -591,12 +502,10 @@
                 formatSpeed(speed) {
                     if (!speed) return '0 B/s';
                     
-                    // If speed is already formatted (contains '/s'), return as is
                     if (typeof speed === 'string' && speed.includes('/s')) {
                         return speed;
                     }
                     
-                    // If speed is a number, format it
                     if (typeof speed === 'number') {
                         const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
                         let size = speed;
