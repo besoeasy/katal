@@ -4,6 +4,7 @@ import { open } from "sqlite";
 import dotenv from "dotenv";
 import path from "path";
 import http from "http";
+import fs from "fs";
 import serveHandler from "serve-handler";
 
 import { SAVE_DIR, WEBX_PORT, getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./aria2.js";
@@ -231,13 +232,30 @@ async function handleCommand(sender, text) {
 
     case "start":
       const saveDirSize = await getDirectorySize(SAVE_DIR).catch(() => 0);
+      
+      // Read SMB credentials from file
+      let smbCredentials = "";
+      try {
+        const credentialsData = fs.readFileSync('/var/run/smb_credentials.txt', 'utf8').trim();
+        const [smbUser, smbPass] = credentialsData.split(':');
+        smbCredentials = `\n📁 SMB/Samba Access:\n` +
+                        `Guest (read-only): //pi.local/katal\n` +
+                        `Full access: //pi.local/katal-rw\n` +
+                        `Username: ${smbUser}\n` +
+                        `Password: ${smbPass}\n`;
+      } catch (error) {
+        console.log("Could not read SMB credentials:", error.message);
+        smbCredentials = `\n📁 SMB Access: Not configured\n`;
+      }
+      
       const startMessage =
         `🤖 Katal Bot\n\n` +
         `Your User ID: ${userIdHash}\n` +
         `Used Space: ${bytesToSize(saveDirSize)}\n` +
         `Server Port: ${WEBX_PORT}\n\n` +
         `🌐 HTTP Access:\n` +
-        `http://pi.local:${WEBX_PORT}\n\n` +
+        `http://pi.local:${WEBX_PORT}\n` +
+        smbCredentials + `\n` +
         `Send help for all commands`;
       await sendEncryptedDM(sender, startMessage);
       break;
