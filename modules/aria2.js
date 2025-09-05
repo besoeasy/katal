@@ -3,7 +3,8 @@ import path from "path";
 
 const ARIA2_RPC_URL = "http://localhost:6398/jsonrpc";
 
-// ------------------ Default Trackers ------------------
+import { SAVE_DIR } from "./vars.js";
+
 const DEFAULT_TRACKERS = [
   "udp://tracker.opentrackr.org:1337/announce",
   "udp://open.demonii.com:1337/announce",
