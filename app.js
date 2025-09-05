@@ -1,6 +1,4 @@
 import { SimplePool, nip19, getPublicKey, finalizeEvent, nip04, generateSecretKey, getEventHash } from "nostr-tools";
-import sqlite3 from "sqlite3";
-import { open } from "sqlite";
 import dotenv from "dotenv";
 import path from "path";
 import http from "http";
@@ -95,28 +93,9 @@ console.log("Bot privkey (hex):", BOT_PRIVKEY_RAW);
 console.log("Bot privkey (nsec):", BOT_PRIVKEY_NSEC);
 console.log("Relays:", RELAYS.join(", "));
 
-// ------------------ DB Setup ------------------
-let db;
-(async function initDB() {
-  db = await open({ filename: ":memory:", driver: sqlite3.Database });
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS processed_events (
-      id TEXT PRIMARY KEY,
-      created_at INTEGER
-    );
-  `);
-})();
-
-// ------------------ Whitelist utilities ------------------
-async function cleanupExpired() {
-  const now = Date.now();
-  await db.run("DELETE FROM processed_events WHERE created_at <= ?", now - EVENT_WINDOW_MS);
-  console.log("[cleanup] removed old events");
-}
-
-setInterval(() => {
-  cleanupExpired().catch((err) => console.error("cleanup error", err));
-}, 10 * 60 * 1000); // Clean up every 10 minutes
+// ------------------ Event tracking with in-memory array ------------------
+const MAX_STORED_EVENTS = 1000; // Reduced from 10000 since we're managing it more efficiently
+const processedEvents = new Map(); // Map of event_id -> timestamp
 
 // ------------------ Nostr connection ------------------
 const pool = new SimplePool();
@@ -136,14 +115,32 @@ const sub = pool.subscribe(RELAYS, filter, {
       }
 
       // Skip already processed events
-      const seen = await db.get("SELECT id FROM processed_events WHERE id = ?", event.id);
-      if (seen) {
+      if (processedEvents.has(event.id)) {
         console.log(`Skipping duplicate event ${event.id}`);
         return;
       }
 
-      // Mark event as processed
-      await db.run("INSERT INTO processed_events (id, created_at) VALUES (?, ?)", event.id, event.created_at * 1000);
+      // Mark event as processed and maintain cache size
+      processedEvents.set(event.id, event.created_at * 1000);
+      
+      // Remove oldest entries if we exceed the limit
+      if (processedEvents.size > MAX_STORED_EVENTS) {
+        // Find and remove the oldest entry
+        let oldestEventId = null;
+        let oldestTimestamp = Infinity;
+        
+        for (const [eventId, timestamp] of processedEvents.entries()) {
+          if (timestamp < oldestTimestamp) {
+            oldestTimestamp = timestamp;
+            oldestEventId = eventId;
+          }
+        }
+        
+        if (oldestEventId) {
+          processedEvents.delete(oldestEventId);
+          console.log(`[cache] Removed oldest event, cache size: ${processedEvents.size}`);
+        }
+      }
 
       // Decrypt (nip04)
       let decrypted;
@@ -681,9 +678,9 @@ process.on("SIGINT", async () => {
     });
   }
 
-  try {
-    await db.close();
-  } catch (e) {}
+  // Clear processed events
+  processedEvents.clear();
+  console.log("Cleared processed events cache");
 
   // Close the subscription
   if (sub && sub.close) {
