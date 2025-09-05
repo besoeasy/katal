@@ -7,11 +7,11 @@ import http from "http";
 import fs from "fs";
 import serveHandler from "serve-handler";
 
-import { SAVE_DIR, WEBX_PORT, getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./aria2.js";
+import { SAVE_DIR, WEBX_PORT, getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./modules/aria2.js";
 
-import { bytesToSize, getDirectorySize, getIpData, getImdbId, fetchTorrent, short, formatDownloadSpeed, getDownloadProgress } from "./utils.js";
+import { bytesToSize, getDirectorySize, getIpData, getImdbId, fetchTorrent, short, formatDownloadSpeed, getDownloadProgress } from "./modules/utils.js";
 
-import { startWebServer } from "./web.js";
+import { startWebServer } from "./modules/web.js";
 
 dotenv.config();
 
