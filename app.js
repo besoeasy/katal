@@ -5,11 +5,11 @@ import http from "http";
 import fs from "fs";
 import serveHandler from "serve-handler";
 
-import { SAVE_DIR, getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./modules/aria2.js";
+import { getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./modules/aria2.js";
 
 import { bytesToSize, getDirectorySize, getIpData, getImdbId, fetchTorrent, short, formatDownloadSpeed, getDownloadProgress } from "./modules/utils.js";
 
-import { SERVERPORT, WEBPORT } from "./modules/vars.js";
+import { SERVERPORT, WEBPORT, SAVE_DIR} from "./modules/vars.js";
 
 import { startWebServer } from "./modules/web.js";
 
