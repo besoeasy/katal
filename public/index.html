@@ -169,33 +169,6 @@
                                 <span class="font-mono text-black font-bold">{{ apiStatus.whitelistCount }}</span>
                             </div>
                             
-                            <!-- Aria2 Stats -->
-                            <div class="space-y-2 bg-gray-100 p-3 rounded-lg">
-                                <h4 class="text-sm font-bold text-gray-800 uppercase">Aria2 Statistics</h4>
-                                <div class="space-y-1 text-xs">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Download Speed:</span>
-                                        <span class="font-mono font-bold">{{ formatSpeed(apiStatus.aria2Stats.downloadSpeed) }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Upload Speed:</span>
-                                        <span class="font-mono font-bold">{{ formatSpeed(apiStatus.aria2Stats.uploadSpeed) }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Active:</span>
-                                        <span class="font-mono font-bold text-green-600">{{ apiStatus.aria2Stats.numActive || 0 }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Waiting:</span>
-                                        <span class="font-mono font-bold text-yellow-600">{{ apiStatus.aria2Stats.numWaiting || 0 }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Stopped:</span>
-                                        <span class="font-mono font-bold text-gray-600">{{ apiStatus.aria2Stats.numStopped || 0 }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
                             <!-- Connection Status Indicator -->
                             <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200">
                                 <div class="w-3 h-3 rounded-full pulse-animate" 
@@ -220,53 +193,7 @@
                     <!-- Extended Status Display -->
                     <div class="h-full space-y-6">
                         
-                        <!-- Server Configuration -->
-                        <div class="scale-in bg-white rounded-2xl p-6 border border-gray-200">
-                            <h3 class="text-xl font-bold text-black uppercase tracking-wide mb-4">
-                                Server Configuration
-                            </h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-3">
-                                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                        <span class="text-sm font-semibold text-gray-700">Web Dashboard</span>
-                                        <span class="font-mono text-black font-bold">:6798</span>
-                                    </div>
-                                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                        <span class="text-sm font-semibold text-gray-700">File Server</span>
-                                        <span class="font-mono text-black font-bold">:{{ apiStatus.webxPort }}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                        <span class="text-sm font-semibold text-gray-700">Process Uptime</span>
-                                        <span class="font-mono text-black font-bold">{{ formatUptime(apiStatus.uptime) }}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center py-2">
-                                        <span class="text-sm font-semibold text-gray-700">Storage Used</span>
-                                        <span class="font-mono text-black font-bold">{{ apiStatus.usedSpaceFormatted }}</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="space-y-3">
-                                    <div class="bg-gray-50 p-3 rounded-lg">
-                                        <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Save Directory</label>
-                                        <div class="font-mono text-sm text-black mt-1 break-all">
-                                            {{ apiStatus.saveDir }}
-                                        </div>
-                                    </div>
-                                    <div class="bg-green-50 p-3 rounded-lg border border-green-200">
-                                        <label class="text-xs font-semibold text-green-700 uppercase tracking-wide">Status</label>
-                                        <div class="flex items-center space-x-2 mt-1">
-                                            <div class="w-2 h-2 rounded-full pulse-animate" 
-                                                 :class="isSystemOnline() ? 'bg-green-500' : 'bg-red-500'"></div>
-                                            <span class="font-bold text-sm" :class="isSystemOnline() ? 'text-green-700' : 'text-red-700'">
-                                                {{ isSystemOnline() ? 'SYSTEM ONLINE' : 'SYSTEM OFFLINE' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
+             
                         <!-- Bot Identity Section -->
                         <div class="scale-in bg-white rounded-2xl p-6 border border-gray-200">
                             <h3 class="text-xl font-bold text-black uppercase tracking-wide mb-4">
@@ -366,31 +293,6 @@
                                 </div>
                                 
                             
-                            </div>
-                        </div>
-                        
-                        <!-- System Information -->
-                        <div class="scale-in bg-white rounded-2xl p-6 border border-gray-200">
-                            <h3 class="text-xl font-bold text-black uppercase tracking-wide mb-4">
-                                System Information
-                            </h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h4 class="text-sm font-bold text-gray-800 uppercase mb-3">Timestamps</h4>
-                                    <div class="space-y-2 text-sm font-mono">
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">Last Updated:</span>
-                                            <span class="text-black">{{ formatTimestamp(lastUpdated) }}</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">API Response:</span>
-                                            <span class="text-black">{{ formatApiTimestamp(apiStatus.timestamp) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                       
                             </div>
                         </div>
                     </div>
