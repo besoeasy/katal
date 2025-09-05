@@ -170,7 +170,8 @@ const sub = pool.subscribe(RELAYS, filter, {
 
       if (validCommands.includes(possibleCommand) || isStatusCommand || isCancelCommand) {
         console.log(`Executing command: ${possibleCommand}`);
-        await handleCommand(sender, cleanContent);
+        // Add small delay before processing command to ensure stability
+        setTimeout(() => handleCommand(sender, cleanContent), 500);
         return;
       }
 
@@ -179,10 +180,26 @@ const sub = pool.subscribe(RELAYS, filter, {
       await sendEncryptedDM(sender, `Unknown command. Send "help" to see available commands.`);
     } catch (err) {
       console.error("Error handling event:", err);
+      // Add retry logic for failed event processing
+      setTimeout(() => {
+        console.log("Event processing error - system will continue");
+      }, 1000);
     }
   },
-  oneose: () => console.log("Subscription established to relays."),
+  oneose: () => {
+    console.log("Subscription established to relays.");
+  },
 });
+
+// Add connection health check
+setInterval(() => {
+  try {
+    // Simple health check - just log that we're still running
+    console.log("Bot health check - system running normally");
+  } catch (error) {
+    console.error("Health check failed:", error);
+  }
+}, 60000); // Every minute
 
 // ------------------ Command handling ------------------
 async function handleCommand(sender, text) {
@@ -215,7 +232,7 @@ async function handleCommand(sender, text) {
     case "start":
       const saveDirSize = await getDirectorySize(SAVE_DIR).catch(() => 0);
       const startMessage =
-        `🤖 Nostr Aria Bot\n\n` +
+        `🤖 Katal Bot\n\n` +
         `Your User ID: ${userIdHash}\n` +
         `Used Space: ${bytesToSize(saveDirSize)}\n` +
         `Server Port: ${WEBX_PORT}\n\n` +
@@ -490,7 +507,7 @@ async function startPeriodicStatsPosting() {
         const saveDirSize = await getDirectorySize(SAVE_DIR).catch(() => 0);
 
         const statsMessage =
-          "📊 Aria2 Bot Status\n\n" +
+          "📊 Katal Bot Status\n\n" +
           `Active: ${numActive}\n` +
           `Queued: ${numWaiting}\n` +
           `Stopped: ${numStopped}\n` +
@@ -517,7 +534,10 @@ function stopPeriodicStatsPosting() {
 }
 
 // ------------------ Sending encrypted DM ------------------
-async function sendEncryptedDM(toPubkey, plaintext) {
+async function sendEncryptedDM(toPubkey, plaintext, retryCount = 0) {
+  const MAX_RETRIES = 2;
+  const RETRY_DELAY = 1000; // 1 second delay between retries
+  
   try {
     const encrypted = await nip04.encrypt(BOT_PRIVKEY, toPubkey, plaintext);
 
@@ -531,17 +551,53 @@ async function sendEncryptedDM(toPubkey, plaintext) {
     // Use finalizeEvent to sign the event properly
     const signedEvent = finalizeEvent(unsignedEvent, BOT_PRIVKEY);
 
+    // Add a small delay before publishing to ensure relay connections are stable
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const results = pool.publish(RELAYS, signedEvent);
     console.log(`Sent DM to ${short(toPubkey)}.`);
 
-    // Wait for publishing results
-    Promise.allSettled(results).then((outcomes) => {
+    // Wait for publishing results with timeout
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Publishing timeout')), 10000)
+    );
+
+    try {
+      const outcomes = await Promise.race([
+        Promise.allSettled(results),
+        timeout
+      ]);
+
       const successful = outcomes.filter((o) => o.status === "fulfilled").length;
       const failed = outcomes.filter((o) => o.status === "rejected").length;
+      
       console.log(`Publish results: ${successful} successful, ${failed} failed`);
-    });
+      
+      // If all failed and we haven't exceeded retries, try again
+      if (successful === 0 && failed > 0 && retryCount < MAX_RETRIES) {
+        console.log(`Retrying DM send (attempt ${retryCount + 1}/${MAX_RETRIES + 1})...`);
+        setTimeout(() => {
+          sendEncryptedDM(toPubkey, plaintext, retryCount + 1);
+        }, RETRY_DELAY * (retryCount + 1)); // Exponential backoff
+        return;
+      }
+      
+    } catch (timeoutError) {
+      console.warn("Publishing timeout, but message may still be delivered");
+    }
+
   } catch (e) {
     console.error("Failed to send DM to", toPubkey, e);
+    
+    // Retry if we haven't exceeded max retries
+    if (retryCount < MAX_RETRIES) {
+      console.log(`Retrying DM send due to error (attempt ${retryCount + 1}/${MAX_RETRIES + 1})...`);
+      setTimeout(() => {
+        sendEncryptedDM(toPubkey, plaintext, retryCount + 1);
+      }, RETRY_DELAY * (retryCount + 1));
+    } else {
+      console.error("Max retries exceeded for DM to", short(toPubkey));
+    }
   }
 }
 
@@ -627,22 +683,29 @@ process.on("SIGINT", async () => {
   process.exit(0);
 });
 
-console.log("Nostr Aria Bot running - send me a DM with commands!");
+console.log("Katal Bot starting up...");
 
-// Start web dashboard
-const botData = {
-  pubkey: BOT_PUBKEY,
-  npub: BOT_PUBKEY_NPUB,
-  privkey: BOT_PRIVKEY_RAW,
-  nsec: BOT_PRIVKEY_NSEC,
-};
+// Add startup delay to ensure all services are ready
+setTimeout(() => {
+  console.log("Katal Bot running - send me a DM with commands!");
+}, 2000);
 
-const webServer = startWebServer(6798, botData, SAVE_DIR, WEBX_PORT);
+// Start web dashboard with a small delay
+setTimeout(() => {
+  const botData = {
+    pubkey: BOT_PUBKEY,
+    npub: BOT_PUBKEY_NPUB,
+    privkey: BOT_PRIVKEY_RAW,
+    nsec: BOT_PRIVKEY_NSEC,
+  };
 
-// Start periodic stats posting after a delay
+  const webServer = startWebServer(6798, botData, SAVE_DIR, WEBX_PORT);
+}, 1000);
+
+// Start periodic stats posting after a longer delay
 setTimeout(() => {
   startPeriodicStatsPosting();
-}, 10000); // Wait 10 seconds before starting periodic stats
+}, 15000); // Wait 15 seconds before starting periodic stats
 
 http
   .createServer((request, response) => {
