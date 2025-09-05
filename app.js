@@ -53,7 +53,7 @@ function loadOrGeneratePrivateKey() {
 
 const BOT_PRIVKEY_RAW = loadOrGeneratePrivateKey();
 
-const EVENT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+const EVENT_WINDOW_MS = 2 * 60 * 1000;
 
 // ------------------ Helpers: privkey parsing ------------------
 function parsePrivKey(input) {
@@ -232,22 +232,23 @@ async function handleCommand(sender, text) {
 
     case "start":
       const saveDirSize = await getDirectorySize(SAVE_DIR).catch(() => 0);
-      
+
       // Read SMB credentials from file
       let smbCredentials = "";
       try {
-        const credentialsData = fs.readFileSync('/var/run/smb_credentials.txt', 'utf8').trim();
-        const [smbUser, smbPass] = credentialsData.split(':');
-        smbCredentials = `\n📁 SMB/Samba Access:\n` +
-                        `Guest (read-only): //pi.local/katal\n` +
-                        `Full access: //pi.local/katal-rw\n` +
-                        `Username: ${smbUser}\n` +
-                        `Password: ${smbPass}\n`;
+        const credentialsData = fs.readFileSync("/var/run/smb_credentials.txt", "utf8").trim();
+        const [smbUser, smbPass] = credentialsData.split(":");
+        smbCredentials =
+          `\n📁 SMB/Samba Access:\n` +
+          `Guest (read-only): //pi.local/katal\n` +
+          `Full access: //pi.local/katal-rw\n` +
+          `Username: ${smbUser}\n` +
+          `Password: ${smbPass}\n`;
       } catch (error) {
         console.log("Could not read SMB credentials:", error.message);
         smbCredentials = `\n📁 SMB Access: Not configured\n`;
       }
-      
+
       const startMessage =
         `🤖 Katal Bot\n\n` +
         `Your User ID: ${userIdHash}\n` +
@@ -255,7 +256,8 @@ async function handleCommand(sender, text) {
         `Server Port: ${WEBX_PORT}\n\n` +
         `🌐 HTTP Access:\n` +
         `http://pi.local:${WEBX_PORT}\n` +
-        smbCredentials + `\n` +
+        smbCredentials +
+        `\n` +
         `Send help for all commands`;
       await sendEncryptedDM(sender, startMessage);
       break;
@@ -555,7 +557,7 @@ function stopPeriodicStatsPosting() {
 async function sendEncryptedDM(toPubkey, plaintext, retryCount = 0) {
   const MAX_RETRIES = 2;
   const RETRY_DELAY = 1000; // 1 second delay between retries
-  
+
   try {
     const encrypted = await nip04.encrypt(BOT_PRIVKEY, toPubkey, plaintext);
 
@@ -570,27 +572,22 @@ async function sendEncryptedDM(toPubkey, plaintext, retryCount = 0) {
     const signedEvent = finalizeEvent(unsignedEvent, BOT_PRIVKEY);
 
     // Add a small delay before publishing to ensure relay connections are stable
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     const results = pool.publish(RELAYS, signedEvent);
     console.log(`Sent DM to ${short(toPubkey)}.`);
 
     // Wait for publishing results with timeout
-    const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Publishing timeout')), 10000)
-    );
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Publishing timeout")), 10000));
 
     try {
-      const outcomes = await Promise.race([
-        Promise.allSettled(results),
-        timeout
-      ]);
+      const outcomes = await Promise.race([Promise.allSettled(results), timeout]);
 
       const successful = outcomes.filter((o) => o.status === "fulfilled").length;
       const failed = outcomes.filter((o) => o.status === "rejected").length;
-      
+
       console.log(`Publish results: ${successful} successful, ${failed} failed`);
-      
+
       // If all failed and we haven't exceeded retries, try again
       if (successful === 0 && failed > 0 && retryCount < MAX_RETRIES) {
         console.log(`Retrying DM send (attempt ${retryCount + 1}/${MAX_RETRIES + 1})...`);
@@ -599,14 +596,12 @@ async function sendEncryptedDM(toPubkey, plaintext, retryCount = 0) {
         }, RETRY_DELAY * (retryCount + 1)); // Exponential backoff
         return;
       }
-      
     } catch (timeoutError) {
       console.warn("Publishing timeout, but message may still be delivered");
     }
-
   } catch (e) {
     console.error("Failed to send DM to", toPubkey, e);
-    
+
     // Retry if we haven't exceeded max retries
     if (retryCount < MAX_RETRIES) {
       console.log(`Retrying DM send due to error (attempt ${retryCount + 1}/${MAX_RETRIES + 1})...`);
