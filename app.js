@@ -27,7 +27,6 @@ const RELAYS = [
   "wss://nostr-relay.wlvs.space",
   "wss://relay.current.fyi",
   "wss://brb.io",
-  "wss://eden.nostr.land",
   "wss://nostr.fmt.wiz.biz"
 ];
 
