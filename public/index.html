@@ -11,232 +11,317 @@
     <!-- Vue.js CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <!-- Custom Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
                     colors: {
                         'primary': '#3b82f6',
+                        'primary-light': '#dbeafe',
                         'accent': '#10b981',
-                        'surface': '#f8fafc',
-                        'card': '#ffffff',
-                        'border': '#e2e8f0'
+                        'surface': '#ffffff',
+                        'surface-alt': '#f8fafc',
+                        'border': '#e2e8f0',
+                        'text-primary': '#0f172a',
+                        'text-secondary': '#64748b',
+                        'text-muted': '#94a3b8'
                     },
-                    fontFamily: {
-                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    boxShadow: {
+                        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+                        'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                        'strong': '0 10px 40px -10px rgba(0, 0, 0, 0.15)'
                     }
                 }
             }
         }
     </script>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <!-- Custom styles -->
     <style>
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
         
-        @keyframes pulse-soft {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.33); }
+            40%, 50% { opacity: 1; }
+            100% { opacity: 0; transform: scale(1.33); }
         }
         
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
         
-        .pulse-soft {
-            animation: pulse-soft 2s ease-in-out infinite;
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
         }
         
-        .card-elegant {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(226, 232, 240, 0.5);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .card-elegant:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            background: rgba(255, 255, 255, 0.95);
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
         }
         
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(-45deg, #3b82f6, #1d4ed8, #2563eb, #1e40af);
+            background-size: 400% 400%;
+            animation: gradient-shift 15s ease infinite;
         }
         
-        .text-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hover-lift {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.15);
+        }
+        
+        .status-indicator {
+            position: relative;
+        }
+        
+        .status-indicator::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            animation: pulse-ring 2s infinite;
+        }
+        
+        .status-online::before {
+            background: rgba(16, 185, 129, 0.4);
+        }
+        
+        .status-offline::before {
+            background: rgba(239, 68, 68, 0.4);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen font-sans">
     <div id="app">
         <!-- Loading Screen -->
         <div v-if="isLoading" class="min-h-screen flex items-center justify-center">
             <div class="text-center">
-                <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p class="text-slate-600 font-medium">Loading dashboard...</p>
+                <div class="relative">
+                    <div class="w-20 h-20 border-4 border-primary-light rounded-full animate-spin border-t-primary mx-auto mb-6"></div>
+                    <div class="absolute inset-0 w-20 h-20 border-4 border-transparent rounded-full animate-ping border-t-primary/20 mx-auto"></div>
+                </div>
+                <p class="text-xl font-medium text-text-secondary">Loading dashboard...</p>
             </div>
         </div>
 
         <!-- Main Dashboard -->
-        <div v-else class="min-h-screen p-6 lg:p-8">
-            <div class="max-w-7xl mx-auto">
+        <div v-else class="min-h-screen p-6 lg:p-12">
+            <div class="max-w-8xl mx-auto">
                 
-                <!-- Header -->
-                <div class="text-center mb-12 fade-in-up">
-                    <h1 class="text-5xl lg:text-6xl font-bold text-gradient mb-6 uppercase">
+                <!-- Header Section -->
+                <div class="text-center mb-12">
+                    <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-primary to-indigo-600 rounded-3xl mb-8 float-animation shadow-strong">
+                        <i data-lucide="bot" class="w-12 h-12 text-white"></i>
+                    </div>
+                    
+                    <h1 class="text-6xl lg:text-7xl font-black text-text-primary mb-6 tracking-tight">
                         Katal Bot
+                        <span class="block text-4xl lg:text-5xl font-light text-text-secondary mt-2">Dashboard</span>
                     </h1>
-                    <div class="flex items-center justify-center space-x-6 mb-6">
-                        <div class="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-border">
-                            <div class="w-3 h-3 bg-accent rounded-full pulse-soft mr-3"></div>
-                            <span class="text-accent font-semibold">{{ connectionStatus }}</span>
-                        </div>
-                        <div class="text-slate-500 font-medium">
-                            {{ formatTime(lastUpdated) }}
+                    
+                    <!-- Status Bar -->
+                    <div class="inline-flex items-center bg-surface glass-card rounded-2xl px-8 py-4 shadow-soft mb-8">
+                        <div class="flex items-center space-x-6">
+                            <div class="flex items-center space-x-3">
+                                <div class="relative">
+                                    <div class="w-4 h-4 bg-accent rounded-full status-indicator status-online"></div>
+                                </div>
+                                <span class="text-lg font-semibold text-accent">{{ connectionStatus }}</span>
+                            </div>
+                            <div class="w-px h-6 bg-border"></div>
+                            <div class="flex items-center space-x-2 text-text-secondary">
+                                <i data-lucide="clock" class="w-5 h-5"></i>
+                                <span class="text-lg">{{ formatTime(lastUpdated) }}</span>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Auto-refresh indicator -->
-                    <div class="flex items-center justify-center space-x-4">
-                        <div class="flex items-center space-x-2 text-slate-500">
-                            <div class="w-2 h-2 bg-primary rounded-full pulse-soft"></div>
-                            <span class="text-sm font-medium">Refreshing in {{ countdown }}s</span>
+                    <!-- Auto-refresh Control -->
+                    <div class="flex items-center justify-center space-x-6">
+                        <div class="flex items-center space-x-3 text-text-muted">
+                            <div class="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                            <span class="text-lg">Refreshing in {{ countdown }}s</span>
                         </div>
                         <button 
                             @click="fetchData" 
-                            class="px-6 py-2 bg-primary hover:bg-blue-600 text-white rounded-full font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                            class="inline-flex items-center space-x-2 px-6 py-3 bg-primary hover:bg-blue-600 text-white rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-medium hover:shadow-strong"
                         >
-                            Refresh Now
+                            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                            <span>Refresh Now</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Status Cards Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <!-- Main Grid -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
                     
                     <!-- Bot Identity Card -->
-                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.1s">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
-                            <span class="text-2xl mr-3">🔑</span>
-                            Bot Identity
-                        </h3>
+                    <div class="bg-surface glass-card rounded-3xl p-8 hover-lift shadow-soft">
+                        <div class="flex items-center space-x-4 mb-8">
+                            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="key" class="w-7 h-7 text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-text-primary">Bot Identity</h3>
+                        </div>
                         
                         <div class="space-y-6">
                             <div>
-                                <label class="text-slate-500 text-sm font-medium">Public Key (hex)</label>
-                                <div class="bg-slate-50 rounded-xl p-4 mt-2 font-mono text-xs break-all border border-slate-200">
+                                <label class="text-lg font-medium text-text-secondary mb-3 block">Public Key (hex)</label>
+                                <div class="bg-surface-alt rounded-xl p-4 font-mono text-sm text-text-primary break-all border border-border">
                                     {{ botData.pubkey }}
                                 </div>
                             </div>
                             
                             <div>
-                                <label class="text-slate-500 text-sm font-medium">Public Key (npub)</label>
-                                <div class="bg-slate-50 rounded-xl p-4 mt-2 font-mono text-xs break-all border border-slate-200">
+                                <label class="text-lg font-medium text-text-secondary mb-3 block">Public Key (npub)</label>
+                                <div class="bg-surface-alt rounded-xl p-4 font-mono text-sm text-text-primary break-all border border-border">
                                     {{ botData.npub }}
                                 </div>
                             </div>
                             
-                            <div class="text-center pt-4">
-                                <div class="inline-block p-6 bg-white rounded-2xl shadow-lg border border-slate-200">
+                            <div class="text-center pt-6">
+                                <div class="inline-block p-6 bg-white rounded-2xl shadow-soft border border-border">
                                     <img 
-                                        :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(botData.npub)}`"
+                                        :src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(botData.npub)}`"
                                         alt="NPUB QR Code"
-                                        class="w-32 h-32 rounded-lg"
+                                        class="w-40 h-40 rounded-lg"
                                     >
                                 </div>
-                                <p class="text-xs text-slate-500 mt-3 font-medium">Scan to connect with Katal on Nostr</p>
+                                <p class="text-lg text-text-muted mt-4 font-medium">Scan to connect with Katal on Nostr</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Server Info Card -->
-                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.2s">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
-                            <span class="text-2xl mr-3">🌐</span>
-                            Server Info
-                        </h3>
+                    <div class="bg-surface glass-card rounded-3xl p-8 hover-lift shadow-soft">
+                        <div class="flex items-center space-x-4 mb-8">
+                            <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="server" class="w-7 h-7 text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-text-primary">Server Info</h3>
+                        </div>
                         
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
-                                <span class="text-slate-600 font-medium">Web Dashboard Port</span>
-                                <span class="font-mono text-accent font-semibold">6798</span>
+                        <div class="space-y-5">
+                            <div class="flex justify-between items-center py-4 border-b border-border">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="monitor" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">Dashboard Port</span>
+                                </div>
+                                <span class="font-mono text-xl font-bold text-accent">6798</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
-                                <span class="text-slate-600 font-medium">File Server Port</span>
-                                <span class="font-mono text-primary font-semibold">{{ botData.webxPort }}</span>
+                            <div class="flex justify-between items-center py-4 border-b border-border">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="globe" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">File Server Port</span>
+                                </div>
+                                <span class="font-mono text-xl font-bold text-primary">{{ botData.webxPort }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
-                                <span class="text-slate-600 font-medium">Save Directory</span>
-                                <span class="font-mono text-purple-600 text-sm font-semibold">{{ botData.saveDir }}</span>
+                            <div class="flex justify-between items-center py-4 border-b border-border">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="folder" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">Save Directory</span>
+                                </div>
+                                <span class="font-mono text-lg font-medium text-purple-600 max-w-32 truncate">{{ botData.saveDir }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
-                                <span class="text-slate-600 font-medium">Used Space</span>
-                                <span class="font-mono text-orange-500 font-semibold">{{ botData.usedSpaceFormatted }}</span>
+                            <div class="flex justify-between items-center py-4 border-b border-border">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="hard-drive" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">Used Space</span>
+                                </div>
+                                <span class="font-mono text-xl font-bold text-orange-500">{{ botData.usedSpaceFormatted }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3">
-                                <span class="text-slate-600 font-medium">Uptime</span>
-                                <span class="font-mono text-cyan-600 font-semibold">{{ formatUptime(botData.uptime) }}</span>
+                            <div class="flex justify-between items-center py-4">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="activity" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">Uptime</span>
+                                </div>
+                                <span class="font-mono text-xl font-bold text-emerald-500">{{ formatUptime(botData.uptime) }}</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Aria2 Stats Card -->
-                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.3s">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
-                            <span class="text-2xl mr-3">📊</span>
-                            Aria2 Stats
-                        </h3>
+                    <div class="bg-surface glass-card rounded-3xl p-8 hover-lift shadow-soft">
+                        <div class="flex items-center space-x-4 mb-8">
+                            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="bar-chart-3" class="w-7 h-7 text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-text-primary">Aria2 Stats</h3>
+                        </div>
                         
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
-                                <span class="text-slate-600 font-medium">Download Speed</span>
-                                <span class="font-mono text-accent font-semibold">{{ formatSpeed(botData.aria2Stats?.downloadSpeed) }}</span>
+                        <div class="space-y-5">
+                            <div class="flex justify-between items-center py-4 border-b border-border">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="download" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">Download Speed</span>
+                                </div>
+                                <span class="font-mono text-xl font-bold text-accent">{{ formatSpeed(botData.aria2Stats?.downloadSpeed) }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
-                                <span class="text-slate-600 font-medium">Upload Speed</span>
-                                <span class="font-mono text-primary font-semibold">{{ formatSpeed(botData.aria2Stats?.uploadSpeed) }}</span>
+                            <div class="flex justify-between items-center py-4 border-b border-border">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="upload" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">Upload Speed</span>
+                                </div>
+                                <span class="font-mono text-xl font-bold text-primary">{{ formatSpeed(botData.aria2Stats?.uploadSpeed) }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
-                                <span class="text-slate-600 font-medium">Active Downloads</span>
-                                <span class="font-mono text-red-500 font-semibold">{{ botData.aria2Stats?.numActive || 0 }}</span>
+                            <div class="flex justify-between items-center py-4 border-b border-border">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="play" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">Active Downloads</span>
+                                </div>
+                                <span class="font-mono text-xl font-bold text-red-500">{{ botData.aria2Stats?.numActive || 0 }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-slate-100">
-                                <span class="text-slate-600 font-medium">Waiting Downloads</span>
-                                <span class="font-mono text-yellow-600 font-semibold">{{ botData.aria2Stats?.numWaiting || 0 }}</span>
+                            <div class="flex justify-between items-center py-4 border-b border-border">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="pause" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">Waiting Downloads</span>
+                                </div>
+                                <span class="font-mono text-xl font-bold text-yellow-500">{{ botData.aria2Stats?.numWaiting || 0 }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-3">
-                                <span class="text-slate-600 font-medium">Stopped Downloads</span>
-                                <span class="font-mono text-slate-500 font-semibold">{{ botData.aria2Stats?.numStopped || 0 }}</span>
+                            <div class="flex justify-between items-center py-4">
+                                <div class="flex items-center space-x-3">
+                                    <i data-lucide="square" class="w-5 h-5 text-text-muted"></i>
+                                    <span class="text-lg font-medium text-text-secondary">Stopped Downloads</span>
+                                </div>
+                                <span class="font-mono text-xl font-bold text-text-muted">{{ botData.aria2Stats?.numStopped || 0 }}</span>
                             </div>
                         </div>
                         
-                        <!-- Download Progress Indicator -->
-                        <div class="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                            <div class="flex justify-between text-sm mb-3 font-medium text-slate-600">
-                                <span>Total Downloads</span>
-                                <span>{{ getTotalDownloads() }}</span>
+                        <!-- Progress Bar -->
+                        <div class="mt-8 p-6 bg-surface-alt rounded-2xl border border-border">
+                            <div class="flex justify-between text-lg font-medium mb-4">
+                                <span class="text-text-secondary">Total Downloads</span>
+                                <span class="text-text-primary font-bold">{{ getTotalDownloads() }}</span>
                             </div>
-                            <div class="w-full bg-slate-200 rounded-full h-3">
+                            <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
                                 <div 
-                                    class="bg-gradient-to-r from-primary to-accent h-3 rounded-full transition-all duration-700 ease-out"
+                                    class="bg-gradient-to-r from-primary to-emerald-500 h-3 rounded-full transition-all duration-1000 ease-out"
                                     :style="{ width: getDownloadProgress() + '%' }"
                                 ></div>
                             </div>
@@ -244,80 +329,91 @@
                     </div>
                 </div>
 
-                <!-- Security & Access Section -->
-                <div class="card-elegant rounded-2xl p-8 mb-8 border-red-200 fade-in-up" style="animation-delay: 0.4s">
-                    <h3 class="text-2xl font-bold text-red-600 mb-6 flex items-center">
-                        <span class="text-2xl mr-3">🔐</span>
-                        Bot Access Control
-                    </h3>
-                    
-                    <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
-                        <div class="flex items-center space-x-3 mb-3">
-                            <div class="w-3 h-3 bg-red-500 rounded-full pulse-soft"></div>
-                            <span class="text-red-700 font-semibold">Security Notice</span>
+                <!-- Security Section -->
+                <div class="bg-surface glass-card rounded-3xl p-8 mb-12 border-l-4 border-red-400 shadow-soft">
+                    <div class="flex items-center space-x-4 mb-8">
+                        <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                            <i data-lucide="shield-check" class="w-7 h-7 text-white"></i>
                         </div>
-                        <p class="text-red-600 text-sm leading-relaxed">
+                        <h3 class="text-2xl font-bold text-text-primary">Bot Access Control</h3>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <div class="w-6 h-6 bg-red-500 rounded-full animate-pulse"></div>
+                            <span class="text-xl font-semibold text-red-700">Security Notice</span>
+                        </div>
+                        <p class="text-lg text-red-600 leading-relaxed">
                             This bot requires authorization to prevent unauthorized downloads. 
                             Users must provide the unlock code to gain access.
                         </p>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div class="space-y-6">
                             <div>
-                                <label class="text-slate-600 text-sm font-semibold">Current Unlock Code</label>
-                                <div class="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-6 mt-3 relative">
-                                    <div class="font-mono text-3xl text-yellow-700 text-center tracking-wider font-bold">
+                                <label class="text-lg font-semibold text-text-secondary mb-4 block">Current Unlock Code</label>
+                                <div class="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-6 relative">
+                                    <div class="font-mono text-4xl text-yellow-700 text-center tracking-wider font-bold">
                                         {{ botData.unlockCode }}
                                     </div>
                                     <button 
                                         @click="copyToClipboard(botData.unlockCode)"
-                                        class="absolute top-3 right-3 text-yellow-600 hover:text-yellow-800 transition-colors p-2 hover:bg-yellow-100 rounded-lg"
+                                        class="absolute top-4 right-4 p-2 text-yellow-600 hover:text-yellow-800 transition-colors rounded-lg hover:bg-yellow-100"
                                         title="Copy unlock code"
                                     >
-                                        📋
+                                        <i data-lucide="copy" class="w-5 h-5"></i>
                                     </button>
                                 </div>
                             </div>
                             
-                            <div class="text-sm text-slate-500 space-y-2 bg-slate-50 p-4 rounded-xl">
-                                <p class="flex items-center"><span class="text-accent mr-2">•</span> Share this code with authorized users</p>
-                                <p class="flex items-center"><span class="text-accent mr-2">•</span> Code is required for first-time access</p>
-                                <p class="flex items-center"><span class="text-accent mr-2">•</span> Once authorized, users remain whitelisted</p>
+                            <div class="text-lg text-text-muted space-y-2 bg-surface-alt rounded-xl p-4">
+                                <p class="flex items-center space-x-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-accent"></i>
+                                    <span>Share this code with authorized users</span>
+                                </p>
+                                <p class="flex items-center space-x-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-accent"></i>
+                                    <span>Code is required for first-time access</span>
+                                </p>
+                                <p class="flex items-center space-x-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-accent"></i>
+                                    <span>Once authorized, users remain whitelisted</span>
+                                </p>
                             </div>
                         </div>
                         
                         <div class="space-y-6">
                             <div>
-                                <label class="text-slate-600 text-sm font-semibold">Authorization Instructions</label>
-                                <div class="bg-slate-50 rounded-xl p-6 mt-3 border border-slate-200">
-                                    <ol class="space-y-3 text-sm text-slate-600">
-                                        <li class="flex items-start">
-                                            <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</span>
-                                            Send a DM to the bot's npub
+                                <label class="text-lg font-semibold text-text-secondary mb-4 block">Authorization Instructions</label>
+                                <div class="bg-surface-alt rounded-2xl p-6 border border-border">
+                                    <ol class="space-y-4 text-lg text-text-primary">
+                                        <li class="flex items-start space-x-3">
+                                            <span class="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold">1</span>
+                                            <span>Send a DM to the bot's npub</span>
                                         </li>
-                                        <li class="flex items-start">
-                                            <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</span>
-                                            Bot will request unlock code
+                                        <li class="flex items-start space-x-3">
+                                            <span class="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold">2</span>
+                                            <span>Bot will request unlock code</span>
                                         </li>
-                                        <li class="flex items-start">
-                                            <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3</span>
-                                            Reply with: <code class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-mono text-xs ml-1">{{ botData.unlockCode }}</code>
+                                        <li class="flex items-start space-x-3">
+                                            <span class="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold">3</span>
+                                            <span>Reply with: <code class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-lg font-mono font-bold">{{ botData.unlockCode }}</code></span>
                                         </li>
-                                        <li class="flex items-start">
-                                            <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">4</span>
-                                            Access granted! Use "help" for commands
+                                        <li class="flex items-start space-x-3">
+                                            <span class="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold">4</span>
+                                            <span>Access granted! Use "help" for commands</span>
                                         </li>
                                     </ol>
                                 </div>
                             </div>
                             
-                            <div class="bg-green-50 border border-green-200 rounded-xl p-6">
-                                <div class="flex items-center space-x-3 text-green-700 mb-2">
-                                    <span class="text-xl">👥</span>
-                                    <span class="font-semibold">Authorized Users</span>
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
+                                <div class="flex items-center space-x-4 text-emerald-700 mb-3">
+                                    <i data-lucide="users" class="w-6 h-6"></i>
+                                    <span class="text-lg font-semibold">Authorized Users</span>
                                 </div>
-                                <div class="text-3xl text-green-600 font-bold font-mono">
+                                <div class="text-4xl text-emerald-600 font-black">
                                     {{ botData.whitelistCount || 0 }}
                                 </div>
                             </div>
@@ -325,27 +421,29 @@
                     </div>
                 </div>
 
-                <!-- Additional Info Section -->
+                <!-- Bottom Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     
                     <!-- Connection Status -->
-                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.5s">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
-                            <span class="text-2xl mr-3">📡</span>
-                            Connection Status
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="flex items-center space-x-4 p-3 bg-green-50 rounded-xl">
-                                <div class="w-4 h-4 bg-accent rounded-full pulse-soft"></div>
-                                <span class="text-slate-700 font-medium">Web Server: Online</span>
+                    <div class="bg-surface glass-card rounded-3xl p-8 shadow-soft">
+                        <div class="flex items-center space-x-4 mb-8">
+                            <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="wifi" class="w-7 h-7 text-white"></i>
                             </div>
-                            <div class="flex items-center space-x-4 p-3 bg-green-50 rounded-xl">
-                                <div class="w-4 h-4 bg-accent rounded-full pulse-soft"></div>
-                                <span class="text-slate-700 font-medium">API Server: Online</span>
+                            <h3 class="text-2xl font-bold text-text-primary">Connection Status</h3>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="flex items-center space-x-4 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                                <div class="w-6 h-6 bg-emerald-500 rounded-full status-indicator status-online"></div>
+                                <span class="text-lg font-semibold text-emerald-700">Web Server: Online</span>
                             </div>
-                            <div class="flex items-center space-x-4 p-3 rounded-xl" :class="isAriaOnline() ? 'bg-green-50' : 'bg-red-50'">
-                                <div :class="isAriaOnline() ? 'bg-accent pulse-soft' : 'bg-red-500'" class="w-4 h-4 rounded-full"></div>
-                                <span class="font-medium" :class="isAriaOnline() ? 'text-slate-700' : 'text-red-600'">
+                            <div class="flex items-center space-x-4 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                                <div class="w-6 h-6 bg-emerald-500 rounded-full status-indicator status-online"></div>
+                                <span class="text-lg font-semibold text-emerald-700">API Server: Online</span>
+                            </div>
+                            <div class="flex items-center space-x-4 p-4 rounded-xl border" :class="isAriaOnline() ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'">
+                                <div :class="isAriaOnline() ? 'bg-emerald-500 status-online' : 'bg-red-500 status-offline'" class="w-6 h-6 rounded-full status-indicator"></div>
+                                <span class="text-lg font-semibold" :class="isAriaOnline() ? 'text-emerald-700' : 'text-red-700'">
                                     Aria2 RPC: {{ isAriaOnline() ? 'Connected' : 'Disconnected' }}
                                 </span>
                             </div>
@@ -353,36 +451,42 @@
                     </div>
 
                     <!-- Quick Actions -->
-                    <div class="card-elegant rounded-2xl p-8 fade-in-up" style="animation-delay: 0.6s">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
-                            <span class="text-2xl mr-3">⚡</span>
-                            Quick Actions
-                        </h3>
+                    <div class="bg-surface glass-card rounded-3xl p-8 shadow-soft">
+                        <div class="flex items-center space-x-4 mb-8">
+                            <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="zap" class="w-7 h-7 text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-text-primary">Quick Actions</h3>
+                        </div>
                         <div class="grid grid-cols-2 gap-4">
                             <a 
                                 :href="`http://localhost:${botData.webxPort}`" 
                                 target="_blank"
-                                class="bg-primary hover:bg-blue-600 text-white p-4 rounded-xl text-center transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
+                                class="flex flex-col items-center justify-center p-6 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-medium hover:shadow-strong"
                             >
-                                📁 File Server
+                                <i data-lucide="folder-open" class="w-8 h-8 mb-3"></i>
+                                <span class="font-semibold text-lg">File Server</span>
                             </a>
                             <button 
                                 @click="copyToClipboard(botData.npub)"
-                                class="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
+                                class="flex flex-col items-center justify-center p-6 bg-purple-500 hover:bg-purple-600 text-white rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-medium hover:shadow-strong"
                             >
-                                📋 Copy NPUB
+                                <i data-lucide="clipboard" class="w-8 h-8 mb-3"></i>
+                                <span class="font-semibold text-lg">Copy NPUB</span>
                             </button>
                             <button 
                                 @click="showQRCode = !showQRCode"
-                                class="bg-accent hover:bg-green-600 text-white p-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
+                                class="flex flex-col items-center justify-center p-6 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-medium hover:shadow-strong"
                             >
-                                📱 Toggle QR
+                                <i data-lucide="qr-code" class="w-8 h-8 mb-3"></i>
+                                <span class="font-semibold text-lg">Toggle QR</span>
                             </button>
                             <button 
                                 @click="fetchData"
-                                class="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
+                                class="flex flex-col items-center justify-center p-6 bg-primary hover:bg-blue-600 text-white rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-medium hover:shadow-strong"
                             >
-                                🔄 Refresh
+                                <i data-lucide="refresh-cw" class="w-8 h-8 mb-3"></i>
+                                <span class="font-semibold text-lg">Refresh</span>
                             </button>
                         </div>
                     </div>
@@ -391,10 +495,10 @@
         </div>
 
         <!-- Toast Notifications -->
-        <div v-if="showToast" class="fixed bottom-6 right-6 bg-white border border-green-200 text-green-800 px-6 py-4 rounded-xl shadow-2xl transition-all duration-300 transform">
+        <div v-if="showToast" class="fixed bottom-8 right-8 bg-accent text-white px-8 py-4 rounded-2xl shadow-strong transition-all duration-500 transform z-50">
             <div class="flex items-center space-x-3">
-                <div class="w-2 h-2 bg-accent rounded-full"></div>
-                <span class="font-medium">{{ toastMessage }}</span>
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+                <span class="text-lg font-semibold">{{ toastMessage }}</span>
             </div>
         </div>
     </div>
@@ -419,6 +523,9 @@
             },
             
             async mounted() {
+                // Initialize Lucide icons
+                lucide.createIcons();
+                
                 await this.fetchData();
                 this.startAutoRefresh();
             },
@@ -447,13 +554,20 @@
                         this.connectionStatus = 'Connected';
                         this.isLoading = false;
                         
+                        // Reset countdown
                         this.countdown = 10;
+                        
+                        // Reinitialize icons after data update
+                        this.$nextTick(() => {
+                            lucide.createIcons();
+                        });
                         
                     } catch (error) {
                         console.error('Failed to fetch data:', error);
                         this.connectionStatus = 'Connection Error';
                         this.showToastMessage(`Error: ${error.message}`);
                         
+                        // Still show some data if we have it
                         if (this.isLoading) {
                             this.botData = {
                                 pubkey: 'Error loading...',
@@ -462,6 +576,7 @@
                                 saveDir: 'N/A',
                                 usedSpaceFormatted: 'N/A',
                                 uptime: 0,
+                                unlockCode: 'ERROR',
                                 aria2Stats: {}
                             };
                             this.isLoading = false;
@@ -470,10 +585,12 @@
                 },
                 
                 startAutoRefresh() {
+                    // Refresh data every 10 seconds
                     this.refreshInterval = setInterval(() => {
                         this.fetchData();
                     }, 10000);
                     
+                    // Update countdown every second
                     this.countdownInterval = setInterval(() => {
                         this.countdown--;
                         if (this.countdown <= 0) {
@@ -502,10 +619,12 @@
                 formatSpeed(speed) {
                     if (!speed) return '0 B/s';
                     
+                    // If speed is already formatted (contains '/s'), return as is
                     if (typeof speed === 'string' && speed.includes('/s')) {
                         return speed;
                     }
                     
+                    // If speed is a number, format it
                     if (typeof speed === 'number') {
                         const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
                         let size = speed;
