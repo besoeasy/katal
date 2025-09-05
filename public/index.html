@@ -210,8 +210,78 @@
                     </div>
                 </div>
 
+                <!-- Security & Access Section -->
+                <div class="mt-6 bg-card-bg border border-red-500 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-red-400 mb-4 flex items-center">
+                        🔐 Bot Access Control
+                    </h3>
+                    
+                    <div class="bg-red-900/30 border border-red-500 rounded-lg p-4 mb-4">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                            <span class="text-red-200 font-semibold">Security Notice</span>
+                        </div>
+                        <p class="text-red-200 text-sm">
+                            This bot requires authorization to prevent unauthorized downloads. 
+                            Users must provide the unlock code to gain access.
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-gray-400 text-sm font-medium">Current Unlock Code</label>
+                                <div class="bg-gray-800 border border-yellow-500 rounded-lg p-4 mt-2 relative">
+                                    <div class="font-mono text-2xl text-yellow-400 text-center tracking-wider">
+                                        {{ botData.unlockCode }}
+                                    </div>
+                                    <div class="absolute top-2 right-2">
+                                        <button 
+                                            @click="copyToClipboard(botData.unlockCode)"
+                                            class="text-gray-400 hover:text-yellow-400 transition-colors"
+                                            title="Copy unlock code"
+                                        >
+                                            📋
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-xs text-gray-500 space-y-1">
+                                <p>• Share this code with authorized users</p>
+                                <p>• Code is required for first-time access</p>
+                                <p>• Once authorized, users remain whitelisted</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-gray-400 text-sm font-medium">Authorization Instructions</label>
+                                <div class="bg-gray-800 rounded-lg p-4 mt-2 text-sm">
+                                    <ol class="space-y-2 text-gray-300">
+                                        <li>1. Send a DM to the bot's npub</li>
+                                        <li>2. Bot will request unlock code</li>
+                                        <li>3. Reply with: <code class="bg-gray-700 px-2 py-1 rounded text-yellow-400">{{ botData.unlockCode }}</code></li>
+                                        <li>4. Access granted! Use "help" for commands</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-green-900/30 border border-green-500 rounded-lg p-3">
+                                <div class="flex items-center space-x-2 text-green-200">
+                                    <span class="text-lg">👥</span>
+                                    <span class="text-sm font-medium">Authorized Users</span>
+                                </div>
+                                <div class="text-2xl text-green-400 font-mono mt-1">
+                                    {{ botData.whitelistCount || 0 }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Additional Info Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                     
                     <!-- Connection Status -->
                     <div class="bg-card-bg border border-border-color rounded-xl p-6">

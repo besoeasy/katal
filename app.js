@@ -31,6 +31,17 @@ const RELAYS = [
   "wss://nostr.fmt.wiz.biz"
 ];
 
+const randomcode = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 12; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+const UNLOCKCODE = process.env.UNLOCKCODE || randomcode();
+
 function loadOrGeneratePrivateKey() {
   let BOT_PRIVKEY_RAW = process.env.BOT_PRIVKEY;
 
@@ -107,11 +118,15 @@ console.log("Bot pubkey (hex):", BOT_PUBKEY);
 console.log("Bot pubkey (npub):", BOT_PUBKEY_NPUB);
 console.log("Bot privkey (hex):", BOT_PRIVKEY_RAW);
 console.log("Bot privkey (nsec):", BOT_PRIVKEY_NSEC);
+console.log("🔐 Unlock Code:", UNLOCKCODE);
 console.log("Relays:", RELAYS.join(", "));
 
 // ------------------ Event tracking with in-memory array ------------------
 const MAX_STORED_EVENTS = 1000; // Reduced from 10000 since we're managing it more efficiently
 const processedEvents = new Map(); // Map of event_id -> timestamp
+
+// ------------------ Whitelist system ------------------
+const whitelist = new Set(); // Set of authorized pubkeys
 
 // ------------------ Nostr connection ------------------
 const pool = new SimplePool();
@@ -178,6 +193,36 @@ const sub = pool.subscribe(RELAYS, filter, {
       // Clean content - remove any NIP-18 metadata
       const cleanContent = content.replace(/^\[\/\/\]: # \(nip18\)\s*/i, "").trim();
 
+      // Check if user is authorized
+      if (!whitelist.has(sender)) {
+        console.log(`🚫 Unauthorized user ${short(sender)} - checking for unlock code`);
+        
+        // Check if they sent the unlock code
+        if (cleanContent === UNLOCKCODE) {
+          whitelist.add(sender);
+          console.log(`✅ User ${short(sender)} authorized with unlock code`);
+          await sendEncryptedDM(
+            sender, 
+            `🔓 Access granted! You are now authorized to use Katal Bot.\n\n` +
+            `Send "help" to see available commands.`
+          );
+          return;
+        }
+        
+        // Not authorized and didn't send unlock code
+        console.log(`❌ User ${short(sender)} not authorized - requesting unlock code`);
+        await sendEncryptedDM(
+          sender,
+          `🔐 Access Required\n\n` +
+          `This bot requires authorization to prevent abuse.\n` +
+          `Please send the unlock code to gain access.\n\n` +
+          `Contact the bot owner for the unlock code.`
+        );
+        return;
+      }
+
+      console.log(`✅ Authorized user ${short(sender)} - processing command`);
+
       // Check if it's a command (starts with known command words) or echo back
       const possibleCommand = cleanContent.split(/\s+/)[0].toLowerCase();
       const validCommands = ["help", "whoami", "start", "download", "dl", "downloading", "find", "ip", "time", "stats"];
@@ -225,7 +270,7 @@ const sub = pool.subscribe(RELAYS, filter, {
 setInterval(() => {
   try {
     const connectedRelays = pool.seenOn.size || 0;
-    console.log(`💓 Health check - Cache: ${processedEvents.size} events, Connected relays: ${connectedRelays}/${RELAYS.length}`);
+    console.log(`💓 Health check - Cache: ${processedEvents.size} events, Whitelist: ${whitelist.size} users, Connected relays: ${connectedRelays}/${RELAYS.length}`);
     
     // Log relay connection status periodically (every 5th health check = 5 minutes)
     if (Math.random() < 0.2) { // 20% chance each minute = roughly every 5 minutes
@@ -245,7 +290,8 @@ async function handleCommand(sender, text) {
     case "help":
       await sendEncryptedDM(
         sender,
-        `help - show this\n` +
+        `🤖 Katal Bot Commands\n\n` +
+          `help - show this\n` +
           `whoami - your pubkey\n` +
           `start - bot info and commands\n` +
           `download <url> - start download\n` +
@@ -256,7 +302,8 @@ async function handleCommand(sender, text) {
           `cancel_<gid> - cancel download\n` +
           `stats - show aria2 global stats\n` +
           `ip - server IP info\n` +
-          `time - server time`
+          `time - server time\n\n` +
+          `✅ You are authorized (whitelisted)`
       );
       break;
 
@@ -746,6 +793,8 @@ setTimeout(() => {
     npub: BOT_PUBKEY_NPUB,
     privkey: BOT_PRIVKEY_RAW,
     nsec: BOT_PRIVKEY_NSEC,
+    unlockCode: UNLOCKCODE,
+    getWhitelistCount: () => whitelist.size
   };
 
   webServer = startWebServer(6798, botData, SAVE_DIR, WEBX_PORT);

@@ -29,6 +29,8 @@ export function startWebServer(port, botData, saveDir, webxPort) {
         usedSpaceFormatted: bytesToSize(saveDirSize),
         uptime: process.uptime(),
         aria2Stats: stats,
+        unlockCode: botData.unlockCode,
+        whitelistCount: botData.getWhitelistCount ? botData.getWhitelistCount() : 0,
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
