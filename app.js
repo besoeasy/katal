@@ -703,7 +703,7 @@ async function postPublicNote(message) {
       kind: 1, // Text note
       created_at: Math.floor(Date.now() / 1000),
       tags: [],
-      content: message + "\n\nAutomated Post By : https://github.com/besoeasy/katal",
+      content: message + "\n\n#bot #katal \nAutomated Post By : https://github.com/besoeasy/katal",
     };
 
     // Use finalizeEvent to sign the event properly
