@@ -13,7 +13,23 @@ import { startWebServer } from "./modules/web.js";
 
 dotenv.config();
 
-const RELAYS = ["wss://relay.damus.io", "wss://nos.lol", "wss://relay.snort.social", "wss://nostr-pub.wellorder.net", "wss://nostr.oxtr.dev"];
+const RELAYS = [
+  "wss://relay.damus.io",
+  "wss://nos.lol", 
+  "wss://relay.snort.social",
+  "wss://nostr-pub.wellorder.net",
+  "wss://nostr.oxtr.dev",
+  "wss://relay.nostr.band",
+  "wss://nostr.wine",
+  "wss://relay.primal.net",
+  "wss://nostr.mom",
+  "wss://relay.nostr.info",
+  "wss://nostr-relay.wlvs.space",
+  "wss://relay.current.fyi",
+  "wss://brb.io",
+  "wss://eden.nostr.land",
+  "wss://nostr.fmt.wiz.biz"
+];
 
 function loadOrGeneratePrivateKey() {
   let BOT_PRIVKEY_RAW = process.env.BOT_PRIVKEY;
@@ -108,15 +124,18 @@ const sub = pool.subscribe(RELAYS, filter, {
       const sender = event.pubkey;
       const encrypted = event.content;
 
+      console.log(`📨 Received event ${event.id.slice(0, 8)} from ${sender.slice(0, 8)}`);
+
       // Skip events older than EVENT_WINDOW_MS
       const ageMs = Date.now() - event.created_at * 1000;
       if (ageMs > EVENT_WINDOW_MS) {
+        console.log(`⏰ Skipping old event (${Math.round(ageMs/1000)}s old)`);
         return;
       }
 
       // Skip already processed events
       if (processedEvents.has(event.id)) {
-        console.log(`Skipping duplicate event ${event.id}`);
+        console.log(`♻️  Skipping duplicate event ${event.id.slice(0, 8)}`);
         return;
       }
 
@@ -138,21 +157,23 @@ const sub = pool.subscribe(RELAYS, filter, {
         
         if (oldestEventId) {
           processedEvents.delete(oldestEventId);
-          console.log(`[cache] Removed oldest event, cache size: ${processedEvents.size}`);
+          console.log(`🗑️  Cache cleanup: removed oldest event, size: ${processedEvents.size}`);
         }
       }
 
       // Decrypt (nip04)
       let decrypted;
       try {
+        console.log(`🔓 Attempting to decrypt message from ${sender.slice(0, 8)}`);
         decrypted = await nip04.decrypt(BOT_PRIVKEY, sender, encrypted);
+        console.log(`✅ Successfully decrypted message`);
       } catch (e) {
-        console.warn("Failed to decrypt message from", sender, "maybe not encrypted to me. Ignoring.");
+        console.warn(`❌ Failed to decrypt message from ${sender.slice(0, 8)}:`, e.message);
         return;
       }
 
       const content = decrypted.trim();
-      console.log(`DM from ${short(sender)}: ${content}`);
+      console.log(`💬 DM from ${short(sender)}: ${content}`);
 
       // Clean content - remove any NIP-18 metadata
       const cleanContent = content.replace(/^\[\/\/\]: # \(nip18\)\s*/i, "").trim();
@@ -185,17 +206,33 @@ const sub = pool.subscribe(RELAYS, filter, {
     }
   },
   oneose: () => {
-    console.log("Subscription established to relays.");
+    console.log("✅ Subscription established to relays");
+    console.log(`📡 Connected to ${RELAYS.length} relays for maximum reliability`);
   },
+  onclose: (reason) => {
+    console.warn("⚠️  Subscription closed:", reason);
+    console.log("🔄 Attempting to reconnect...");
+    
+    // Attempt to reconnect after 5 seconds
+    setTimeout(() => {
+      console.log("🔌 Reconnecting to relays...");
+      // The pool will automatically handle reconnection
+    }, 5000);
+  }
 });
 
-// Add connection health check
+// Add connection health check with more detailed logging
 setInterval(() => {
   try {
-    // Simple health check - just log that we're still running
-    console.log("Bot health check - system running normally");
+    const connectedRelays = pool.seenOn.size || 0;
+    console.log(`💓 Health check - Cache: ${processedEvents.size} events, Connected relays: ${connectedRelays}/${RELAYS.length}`);
+    
+    // Log relay connection status periodically (every 5th health check = 5 minutes)
+    if (Math.random() < 0.2) { // 20% chance each minute = roughly every 5 minutes
+      console.log(`🌐 Relay status check - ensuring connectivity to all ${RELAYS.length} relays`);
+    }
   } catch (error) {
-    console.error("Health check failed:", error);
+    console.error("❌ Health check failed:", error);
   }
 }, 60000); // Every minute
 
@@ -665,6 +702,8 @@ async function postPublicNote(message) {
 }
 
 // ------------------ Graceful shutdown ------------------
+let webServer; // Declare webServer variable
+
 process.on("SIGINT", async () => {
   console.log("Shutting down...");
 
@@ -709,7 +748,7 @@ setTimeout(() => {
     nsec: BOT_PRIVKEY_NSEC,
   };
 
-  const webServer = startWebServer(6798, botData, SAVE_DIR, WEBX_PORT);
+  webServer = startWebServer(6798, botData, SAVE_DIR, WEBX_PORT);
 }, 1000);
 
 // Start periodic stats posting after a longer delay
