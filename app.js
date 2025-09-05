@@ -130,11 +130,44 @@ const processedEvents = new Map(); // Map of event_id -> timestamp
 const whitelist = new Set(); // Set of authorized pubkeys
 
 // ------------------ Nostr connection ------------------
-const pool = new SimplePool();
+let pool = new SimplePool();
+let sub = null;
 
 const filter = { kinds: [4], "#p": [BOT_PUBKEY] };
 
-const sub = pool.subscribe(RELAYS, filter, {
+// Function to create new relay connection
+function createRelayConnection() {
+  const startTime = Date.now();
+  console.log("🔄 Creating new relay connection...");
+  
+  // Close existing subscription if it exists
+  if (sub && sub.close) {
+    try {
+      sub.close();
+      console.log("✅ Closed existing subscription");
+    } catch (error) {
+      console.warn("⚠️  Error closing subscription:", error.message);
+    }
+  }
+  
+  // Destroy existing pool if it exists
+  if (pool) {
+    try {
+      pool.destroy();
+      console.log("✅ Destroyed existing pool");
+    } catch (error) {
+      console.warn("⚠️  Error destroying pool:", error.message);
+    }
+  }
+  
+  // Short pause to ensure cleanup is complete
+  setTimeout(() => {
+    // Create new pool
+    pool = new SimplePool();
+    console.log("✅ Created new pool");
+    
+    // Create new subscription
+    sub = pool.subscribe(RELAYS, filter, {
   onevent: async (event) => {
     try {
       const sender = event.pubkey;
@@ -262,11 +295,25 @@ const sub = pool.subscribe(RELAYS, filter, {
     }, 5000);
   },
 });
+    
+    const endTime = Date.now();
+    console.log(`✅ Relay connection created successfully in ${endTime - startTime}ms`);
+  }, 100); // Small delay to ensure cleanup
+}
+
+// Initial connection setup
+createRelayConnection();
+
+// Restart relay connections every 100 seconds to prevent stuck connections
+setInterval(() => {
+  console.log("🔄 Scheduled relay restart (every 100 seconds)");
+  createRelayConnection();
+}, 100 * 1000); // 100 seconds
 
 // Add connection health check with more detailed logging
 setInterval(() => {
   try {
-    const connectedRelays = pool.seenOn.size || 0;
+    const connectedRelays = pool && pool.seenOn ? pool.seenOn.size : 0;
     console.log(
       `💓 Health check - Cache: ${processedEvents.size} events, Whitelist: ${whitelist.size} users, Connected relays: ${connectedRelays}/${RELAYS.length}`
     );
@@ -655,6 +702,15 @@ async function sendEncryptedDM(toPubkey, plaintext, retryCount = 0) {
     // Add a small delay before publishing to ensure relay connections are stable
     await new Promise((resolve) => setTimeout(resolve, 100));
 
+    // Check if pool exists (might be temporarily null during restart)
+    if (!pool) {
+      console.warn("⚠️  Pool not available during DM sending, retrying in 1 second...");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (!pool) {
+        throw new Error("Pool unavailable after retry");
+      }
+    }
+
     const results = pool.publish(RELAYS, signedEvent);
     console.log(`Sent DM to ${short(toPubkey)}.`);
 
@@ -714,6 +770,12 @@ async function postPublicNote(message) {
     // Use the pool to publish - wait a bit longer for connections
     setTimeout(async () => {
       try {
+        // Check if pool exists (might be temporarily null during restart)
+        if (!pool) {
+          console.warn("⚠️  Pool not available during stats posting, skipping this cycle");
+          return;
+        }
+
         const publishPromises = pool.publish(RELAYS, signedEvent);
 
         // Wait for all publishing attempts
