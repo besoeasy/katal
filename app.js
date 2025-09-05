@@ -9,7 +9,7 @@ import { getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, c
 
 import { bytesToSize, getDirectorySize, getIpData, getImdbId, fetchTorrent, short, formatDownloadSpeed, getDownloadProgress } from "./modules/utils.js";
 
-import { SERVERPORT, WEBPORT, SAVE_DIR, SMBPORT} from "./modules/vars.js";
+import { SERVERPORT, WEBPORT, SAVE_DIR, SMBPORT } from "./modules/vars.js";
 
 import { startWebServer } from "./modules/web.js";
 
@@ -695,8 +695,6 @@ async function sendEncryptedDM(toPubkey, plaintext, retryCount = 0) {
   }
 }
 
-// ------------------ Public Note Posting ------------------
-// ------------------ Public Note Posting ------------------
 async function postPublicNote(message) {
   try {
     console.log("Preparing to post public note...");
@@ -705,7 +703,7 @@ async function postPublicNote(message) {
       kind: 1, // Text note
       created_at: Math.floor(Date.now() / 1000),
       tags: [],
-      content: message,
+      content: message + "\n\nAutomated Post By : https://github.com/besoeasy/katal",
     };
 
     // Use finalizeEvent to sign the event properly
