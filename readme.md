@@ -1,3 +1,6 @@
+<img width="1582" height="1123" alt="1" src="https://github.com/user-attachments/assets/6cecc83b-0fc9-4e57-ad94-706a2fffb038" />
+
+
 # 📥 KATAL
 
 **KATAL** is a **decentralized download manager** powered by a **Nostr bot**.
@@ -69,11 +72,3 @@ This means:
 - Minimal censorship
 - Open participation
 - Greater resilience
-
----
-
-## 📖 Related Projects
-
-- [Telearia](https://github.com/besoeasy/telearia) – original inspiration
-
----
