@@ -45,7 +45,8 @@ async function removeEmptyFolders(dir) {
       }
     }
     const isEmpty = (await fs.promises.readdir(dir)).length === 0;
-    if (isEmpty && dir !== SAVE_DIR) { // Don't delete the main SAVE_DIR
+    if (isEmpty && dir !== SAVE_DIR) {
+      // Don't delete the main SAVE_DIR
       await fs.promises.rmdir(dir);
       console.log(`Removed empty folder: ${dir}`);
     }
@@ -106,10 +107,7 @@ async function autoCleanOldFiles() {
 
     await removeEmptyFolders(SAVE_DIR);
 
-    const message =
-      `🧹 Auto-clean completed!\n` +
-      `✅ Deleted ${deletedCount} files older than 30 days\n` +
-      `💾 Freed up ${bytesToSize(totalSize)} of space`;
+    const message = `🧹 Auto-clean completed!\n` + `✅ Deleted ${deletedCount} files older than 30 days\n` + `💾 Freed up ${bytesToSize(totalSize)} of space`;
 
     console.log(`Auto-clean: Deleted ${deletedCount} files, freed ${bytesToSize(totalSize)}`);
     return message;
@@ -243,7 +241,7 @@ const filter = { kinds: [4], "#p": [BOT_PUBKEY] };
 function createRelayConnection() {
   const startTime = Date.now();
   console.log("🔄 Creating new relay connection...");
-  
+
   // Close existing subscription if it exists
   if (sub && sub.close) {
     try {
@@ -253,7 +251,7 @@ function createRelayConnection() {
       console.warn("⚠️  Error closing subscription:", error.message);
     }
   }
-  
+
   // Destroy existing pool if it exists
   if (pool) {
     try {
@@ -263,143 +261,143 @@ function createRelayConnection() {
       console.warn("⚠️  Error destroying pool:", error.message);
     }
   }
-  
+
   // Short pause to ensure cleanup is complete
   setTimeout(() => {
     // Create new pool
     pool = new SimplePool();
     console.log("✅ Created new pool");
-    
+
     // Create new subscription
     sub = pool.subscribe(RELAYS, filter, {
-  onevent: async (event) => {
-    try {
-      const sender = event.pubkey;
-      const encrypted = event.content;
+      onevent: async (event) => {
+        try {
+          const sender = event.pubkey;
+          const encrypted = event.content;
 
-      console.log(`📨 Received event ${event.id.slice(0, 8)} from ${sender.slice(0, 8)}`);
+          console.log(`📨 Received event ${event.id.slice(0, 8)} from ${sender.slice(0, 8)}`);
 
-      // Skip events older than EVENT_WINDOW_MS
-      const ageMs = Date.now() - event.created_at * 1000;
-      if (ageMs > EVENT_WINDOW_MS) {
-        console.log(`⏰ Skipping old event (${Math.round(ageMs / 1000)}s old)`);
-        return;
-      }
-
-      // Skip already processed events
-      if (processedEvents.has(event.id)) {
-        console.log(`♻️  Skipping duplicate event ${event.id.slice(0, 8)}`);
-        return;
-      }
-
-      // Mark event as processed and maintain cache size
-      processedEvents.set(event.id, event.created_at * 1000);
-
-      // Remove oldest entries if we exceed the limit
-      if (processedEvents.size > MAX_STORED_EVENTS) {
-        // Find and remove the oldest entry
-        let oldestEventId = null;
-        let oldestTimestamp = Infinity;
-
-        for (const [eventId, timestamp] of processedEvents.entries()) {
-          if (timestamp < oldestTimestamp) {
-            oldestTimestamp = timestamp;
-            oldestEventId = eventId;
+          // Skip events older than EVENT_WINDOW_MS
+          const ageMs = Date.now() - event.created_at * 1000;
+          if (ageMs > EVENT_WINDOW_MS) {
+            console.log(`⏰ Skipping old event (${Math.round(ageMs / 1000)}s old)`);
+            return;
           }
+
+          // Skip already processed events
+          if (processedEvents.has(event.id)) {
+            console.log(`♻️  Skipping duplicate event ${event.id.slice(0, 8)}`);
+            return;
+          }
+
+          // Mark event as processed and maintain cache size
+          processedEvents.set(event.id, event.created_at * 1000);
+
+          // Remove oldest entries if we exceed the limit
+          if (processedEvents.size > MAX_STORED_EVENTS) {
+            // Find and remove the oldest entry
+            let oldestEventId = null;
+            let oldestTimestamp = Infinity;
+
+            for (const [eventId, timestamp] of processedEvents.entries()) {
+              if (timestamp < oldestTimestamp) {
+                oldestTimestamp = timestamp;
+                oldestEventId = eventId;
+              }
+            }
+
+            if (oldestEventId) {
+              processedEvents.delete(oldestEventId);
+              console.log(`🗑️  Cache cleanup: removed oldest event, size: ${processedEvents.size}`);
+            }
+          }
+
+          // Decrypt (nip04)
+          let decrypted;
+          try {
+            console.log(`🔓 Attempting to decrypt message from ${sender.slice(0, 8)}`);
+            decrypted = await nip04.decrypt(BOT_PRIVKEY, sender, encrypted);
+            console.log(`✅ Successfully decrypted message`);
+          } catch (e) {
+            console.warn(`❌ Failed to decrypt message from ${sender.slice(0, 8)}:`, e.message);
+            return;
+          }
+
+          const content = decrypted.trim();
+          console.log(`💬 DM from ${short(sender)}: ${content}`);
+
+          // Clean content - remove any NIP-18 metadata
+          const cleanContent = content.replace(/^\[\/\/\]: # \(nip18\)\s*/i, "").trim();
+
+          // Check if user is authorized
+          if (!whitelist.has(sender)) {
+            console.log(`🚫 Unauthorized user ${short(sender)} - checking for unlock code`);
+
+            // Check if they sent the unlock code
+            if (cleanContent === UNLOCKCODE) {
+              whitelist.add(sender);
+              console.log(`✅ User ${short(sender)} authorized with unlock code`);
+              await sendEncryptedDM(sender, `🔓 Access granted! You are now authorized to use Katal Bot.\n\n` + `Send "help" to see available commands.`);
+              return;
+            }
+
+            // Not authorized and didn't send unlock code
+            console.log(`❌ User ${short(sender)} not authorized - requesting unlock code`);
+            await sendEncryptedDM(
+              sender,
+              `🔐 Access Required\n\n` +
+                `This bot requires authorization to prevent abuse.\n` +
+                `Please send the unlock code to gain access.\n\n` +
+                `Contact the bot owner for the unlock code.`
+            );
+            return;
+          }
+
+          console.log(`✅ Authorized user ${short(sender)} - processing command`);
+
+          // Check if it's a command (starts with known command words) or echo back
+          const possibleCommand = cleanContent.split(/\s+/)[0].toLowerCase();
+          const validCommands = ["help", "whoami", "start", "download", "dl", "downloading", "find", "ip", "time", "stats", "clean", "autoclean"];
+
+          const isStatusCommand = possibleCommand.startsWith("status_");
+          const isCancelCommand = possibleCommand.startsWith("cancel_");
+
+          console.log(`Checking command: '${possibleCommand}' from content: '${cleanContent}'`);
+
+          if (validCommands.includes(possibleCommand) || isStatusCommand || isCancelCommand) {
+            console.log(`Executing command: ${possibleCommand}`);
+            // Add small delay before processing command to ensure stability
+            setTimeout(() => handleCommand(sender, cleanContent), 500);
+            return;
+          }
+
+          // Send help message for unrecognized input
+          console.log(`Unrecognized message: '${cleanContent}' - sending help`);
+          await sendEncryptedDM(sender, `Unknown command. Send "help" to see available commands.`);
+        } catch (err) {
+          console.error("Error handling event:", err);
+          // Add retry logic for failed event processing
+          setTimeout(() => {
+            console.log("Event processing error - system will continue");
+          }, 1000);
         }
+      },
+      oneose: () => {
+        console.log("✅ Subscription established to relays");
+        console.log(`📡 Connected to ${RELAYS.length} relays for maximum reliability`);
+      },
+      onclose: (reason) => {
+        console.warn("⚠️  Subscription closed:", reason);
+        console.log("🔄 Attempting to reconnect...");
 
-        if (oldestEventId) {
-          processedEvents.delete(oldestEventId);
-          console.log(`🗑️  Cache cleanup: removed oldest event, size: ${processedEvents.size}`);
-        }
-      }
+        // Attempt to reconnect after 5 seconds
+        setTimeout(() => {
+          console.log("🔌 Reconnecting to relays...");
+          // The pool will automatically handle reconnection
+        }, 5000);
+      },
+    });
 
-      // Decrypt (nip04)
-      let decrypted;
-      try {
-        console.log(`🔓 Attempting to decrypt message from ${sender.slice(0, 8)}`);
-        decrypted = await nip04.decrypt(BOT_PRIVKEY, sender, encrypted);
-        console.log(`✅ Successfully decrypted message`);
-      } catch (e) {
-        console.warn(`❌ Failed to decrypt message from ${sender.slice(0, 8)}:`, e.message);
-        return;
-      }
-
-      const content = decrypted.trim();
-      console.log(`💬 DM from ${short(sender)}: ${content}`);
-
-      // Clean content - remove any NIP-18 metadata
-      const cleanContent = content.replace(/^\[\/\/\]: # \(nip18\)\s*/i, "").trim();
-
-      // Check if user is authorized
-      if (!whitelist.has(sender)) {
-        console.log(`🚫 Unauthorized user ${short(sender)} - checking for unlock code`);
-
-        // Check if they sent the unlock code
-        if (cleanContent === UNLOCKCODE) {
-          whitelist.add(sender);
-          console.log(`✅ User ${short(sender)} authorized with unlock code`);
-          await sendEncryptedDM(sender, `🔓 Access granted! You are now authorized to use Katal Bot.\n\n` + `Send "help" to see available commands.`);
-          return;
-        }
-
-        // Not authorized and didn't send unlock code
-        console.log(`❌ User ${short(sender)} not authorized - requesting unlock code`);
-        await sendEncryptedDM(
-          sender,
-          `🔐 Access Required\n\n` +
-            `This bot requires authorization to prevent abuse.\n` +
-            `Please send the unlock code to gain access.\n\n` +
-            `Contact the bot owner for the unlock code.`
-        );
-        return;
-      }
-
-      console.log(`✅ Authorized user ${short(sender)} - processing command`);
-
-      // Check if it's a command (starts with known command words) or echo back
-      const possibleCommand = cleanContent.split(/\s+/)[0].toLowerCase();
-      const validCommands = ["help", "whoami", "start", "download", "dl", "downloading", "find", "ip", "time", "stats", "clean", "autoclean"];
-
-      const isStatusCommand = possibleCommand.startsWith("status_");
-      const isCancelCommand = possibleCommand.startsWith("cancel_");
-
-      console.log(`Checking command: '${possibleCommand}' from content: '${cleanContent}'`);
-
-      if (validCommands.includes(possibleCommand) || isStatusCommand || isCancelCommand) {
-        console.log(`Executing command: ${possibleCommand}`);
-        // Add small delay before processing command to ensure stability
-        setTimeout(() => handleCommand(sender, cleanContent), 500);
-        return;
-      }
-
-      // Send help message for unrecognized input
-      console.log(`Unrecognized message: '${cleanContent}' - sending help`);
-      await sendEncryptedDM(sender, `Unknown command. Send "help" to see available commands.`);
-    } catch (err) {
-      console.error("Error handling event:", err);
-      // Add retry logic for failed event processing
-      setTimeout(() => {
-        console.log("Event processing error - system will continue");
-      }, 1000);
-    }
-  },
-  oneose: () => {
-    console.log("✅ Subscription established to relays");
-    console.log(`📡 Connected to ${RELAYS.length} relays for maximum reliability`);
-  },
-  onclose: (reason) => {
-    console.warn("⚠️  Subscription closed:", reason);
-    console.log("🔄 Attempting to reconnect...");
-
-    // Attempt to reconnect after 5 seconds
-    setTimeout(() => {
-      console.log("🔌 Reconnecting to relays...");
-      // The pool will automatically handle reconnection
-    }, 5000);
-  },
-});
-    
     const endTime = Date.now();
     console.log(`✅ Relay connection created successfully in ${endTime - startTime}ms`);
   }, 100); // Small delay to ensure cleanup
@@ -772,8 +770,15 @@ async function startPeriodicStatsPosting() {
 
         const saveDirSize = await getDirectorySize(SAVE_DIR).catch(() => 0);
 
+        const uptime = process.uptime();
+        const uptimeHours = Math.floor(uptime / 3600);
+        const uptimeMinutes = Math.floor((uptime % 3600) / 60);
+        const uptimeSeconds = uptime % 60;
+
         const statsMessage =
           "📊 Katal Bot Status\n\n" +
+          `Uptime: ${uptimeHours}h ${uptimeMinutes}m ${uptimeSeconds}s\n` +
+          `Authorised Users: ${getAuthorisedUserCount()}\n` +
           `Active: ${numActive}\n` +
           `Queued: ${numWaiting}\n` +
           `Stopped: ${numStopped}\n` +
@@ -788,7 +793,7 @@ async function startPeriodicStatsPosting() {
     } catch (error) {
       console.error("Error posting periodic stats:", error);
     }
-  }, 10 * 60 * 1000); // 10 minutes
+  }, 25 * 60 * 1000); // 25 minutes
 }
 
 function stopPeriodicStatsPosting() {
@@ -981,7 +986,7 @@ setTimeout(() => {
 // Start periodic stats posting after a longer delay
 setTimeout(() => {
   startPeriodicStatsPosting();
-}, 15000); // Wait 15 seconds before starting periodic stats
+}, 55000); // Wait 15 seconds before starting periodic stats
 
 http
   .createServer((request, response) => {
