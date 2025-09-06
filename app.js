@@ -967,7 +967,7 @@ console.log("Katal Bot starting up...");
 // Add startup delay to ensure all services are ready
 setTimeout(() => {
   console.log("Katal Bot running - send me a DM with commands!");
-}, 2000);
+}, 7000);
 
 // Start web dashboard with a small delay
 setTimeout(() => {
