@@ -11,8 +11,6 @@
     "express": "^5.1.0",
     "http": "^0.0.1-security",
     "nostr-tools": "^2.16.2",
-    "serve-handler": "^6.1.6",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "serve-handler": "^6.1.6"
   }
 }

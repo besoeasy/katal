@@ -36,7 +36,7 @@ docker run -d \
   -p 6888:6888/tcp \
   -p 6888:6888/udp \
   -v katal-data:/tmp/katal \
-  ghcr.io/besoeasy/katal:test
+  ghcr.io/besoeasy/katal:main
 ```
 
 ---
