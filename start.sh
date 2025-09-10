@@ -65,16 +65,7 @@ smbd --foreground --no-process-group &
 
 sleep 2
 
-# Start Aria2c with basic configuration (trackers will be added per download)
-aria2c \
-  --enable-rpc \
-  --rpc-listen-all \
-  --rpc-listen-port=6398 \
-  --listen-port=6888 \
-  --enable-dht=true \
-  --enable-peer-exchange=true \
-  --seed-time=100 \
-  --max-upload-limit=0 &
+aria2c --enable-rpc --rpc-listen-all --rpc-listen-port=6398 --listen-port=6888 --enable-dht=true --enable-peer-exchange=true --seed-time=100 &
 
 sleep 2
 
