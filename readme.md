@@ -36,7 +36,6 @@ docker run -d \
   -p 6888:6888/tcp \
   -p 6888:6888/udp \
   -v katal-data:/tmp/katal \
-  -e NSEC=nsec16aku93935fxtnw7ukrnmygy0zmwtwn2a5ntqypl2nvex05mrh85qeu54v7 \
   ghcr.io/besoeasy/katal:test
 ```
 
