@@ -75,7 +75,7 @@ nginx -g 'daemon off;' &
 sleep 2
 
 while true; do
-   node app.js
+   bun app.js
    echo "Bot crashed with exit code $? - restarting in 5 seconds..."
    sleep 7
 done

@@ -1,5 +1,7 @@
-FROM node:lts-slim
+# Use Bun official image instead of Node
+FROM oven/bun:latest
 
+# Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       aria2 samba python3 make g++ \
@@ -7,11 +9,15 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN  npm install --production
+# Copy package manifests and install with Bun
+COPY package.json bun.lockb* ./
+RUN bun install --production
 
+# Copy the rest of the source code
 COPY . .
 
-EXPOSE 445 6798 6799 6888/tcp 6888/udp
+# Expose the same ports
+EXPOSE 445 6799 6888/tcp 6888/udp
 
+# Run your start script
 CMD ["bash", "start.sh"]
