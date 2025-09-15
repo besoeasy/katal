@@ -29,9 +29,9 @@ Run KATAL using Docker:
 docker run -d \
   --name katal \
   --restart unless-stopped \
-  -p 6798:6798 \
-  -p 6799:6799 \
-  -p 445:445 \
+  -p 6798:6798 \   # Bot setup UI
+  -p 6799:6799 \   # Web file access
+  -p 445:445 \     # SMB share
   -p 51413:51413/tcp \
   -p 51413:51413/udp \
   -v katal-data:/tmp/katal \
@@ -47,7 +47,7 @@ docker run -d \
 | 6798  | Bot setup UI          |
 | 6799  | Web file access       |
 | 445   | Samba SMB share       |
-| 51413 | Torrent communication |
+| 59123 | Torrent communication |
 
 ---
 

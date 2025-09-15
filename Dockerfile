@@ -17,7 +17,7 @@ RUN bun install --production
 COPY . .
 
 # Expose the same ports
-EXPOSE 445 6798 6799 51413/tcp 51413/udp
+EXPOSE 445 6798 6799 59123/tcp 59123/udp
 
 # Run your start script
 CMD ["bash", "start.sh"]
