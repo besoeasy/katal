@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Ensure SAVE_DIR exists
-SAVE_DIR=$(node -e "console.log(require('os').tmpdir() + '/bukka')")
+SAVE_DIR=$(node -e "console.log(require('os').tmpdir() + '/katal')")
 
 mkdir -p "$SAVE_DIR"
 

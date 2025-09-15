@@ -472,8 +472,8 @@ async function handleCommand(sender, text) {
         const [smbUser, smbPass] = credentialsData.split(":");
         smbCredentials =
           `\n📁 SMB/Samba Access:\n` +
-          `Guest (read-only): //pi.local/katal\n` +
-          `Full access: //pi.local/katal-rw\n` +
+          `Guest (read-only): //hostname/katal\n` +
+          `Full access: //hostname/katal-rw\n` +
           `Username: ${smbUser}\n` +
           `Password: ${smbPass}\n`;
       } catch (error) {
@@ -487,7 +487,7 @@ async function handleCommand(sender, text) {
         `Used Space: ${bytesToSize(saveDirSize)}\n` +
         `Server Port: ${SERVERPORT}\n\n` +
         `🌐 HTTP Access:\n` +
-        `http://pi.local:${SERVERPORT}\n` +
+        `http://hostname:${SERVERPORT}\n` +
         smbCredentials +
         `\n` +
         `Send help for all commands`;
@@ -988,12 +988,34 @@ setTimeout(() => {
   startPeriodicStatsPosting();
 }, 55000); // Wait 15 seconds before starting periodic stats
 
-http
-  .createServer((request, response) => {
-    return serveHandler(request, response, {
-      public: SAVE_DIR,
-      directoryListing: true,
-      cleanUrls: false,
-    });
-  })
-  .listen(SERVERPORT, () => {});
+import { join } from "path";
+import { readdir, stat, readFile } from "fs/promises";
+
+const serveStatic = async (req, dir) => {
+  const url = new URL(req.url);
+  let filePath = join(dir, decodeURIComponent(url.pathname));
+  try {
+    const fileStat = await stat(filePath);
+    if (fileStat.isDirectory()) {
+      // Directory listing
+      const files = await readdir(filePath);
+      return new Response(
+        `<h1>Index of ${url.pathname}</h1><ul>` + files.map((f) => `<li><a href="${url.pathname.replace(/\/$/, "")}/${f}">${f}</a></li>`).join("") + `</ul>`,
+        { headers: { "Content-Type": "text/html" } }
+      );
+    } else {
+      // Serve file
+      const data = await readFile(filePath);
+      return new Response(data);
+    }
+  } catch {
+    return new Response("Not found", { status: 404 });
+  }
+};
+
+Bun.serve({
+  port: SERVERPORT,
+  async fetch(req) {
+    return serveStatic(req, SAVE_DIR);
+  },
+});
