@@ -32,10 +32,34 @@ docker run -d \
   -p 6798:6798 \   # Bot setup UI
   -p 6799:6799 \   # Web file access
   -p 445:445 \     # SMB share
-  -p 51413:51413/tcp \
-  -p 51413:51413/udp \
+  -p 59123:59123/tcp \
+  -p 59123:59123/udp \
   -v katal-data:/tmp/katal \
   ghcr.io/besoeasy/katal:main
+```
+
+OR
+
+```bash
+
+version: "3.8"
+
+services:
+  katal:
+    image: ghcr.io/besoeasy/katal:test
+    container_name: katal
+    restart: unless-stopped
+    ports:
+      - "6798:6798"   # Bot setup UI
+      - "6799:6799"   # Web file access
+      - "445:445"     # SMB share
+      - "59123:59123/tcp"
+      - "59123:59123/udp"
+    volumes:
+      - katal-data:/tmp/katal
+
+volumes:
+  katal-data:
 ```
 
 ---
