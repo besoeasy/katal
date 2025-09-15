@@ -5,7 +5,6 @@ const ARIA2_RPC_URL = "http://localhost:6398/jsonrpc";
 
 import { SAVE_DIR } from "./vars.js";
 
-// ------------------ Core Aria2 Communication ------------------
 const axiosPost = async (method, params = []) => {
   try {
     const { data } = await axios.post(ARIA2_RPC_URL, {

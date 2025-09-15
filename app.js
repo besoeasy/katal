@@ -131,7 +131,10 @@ const RELAYS = [
 const randomcode = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
-  for (let i = 0; i < 12; i++) {
+
+  const randomDecimal = Math.floor(Math.random() * (20 - 10 + 1)) + 10;
+
+  for (let i = 0; i < randomDecimal; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
