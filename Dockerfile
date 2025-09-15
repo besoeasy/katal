@@ -4,7 +4,7 @@ FROM oven/bun:latest
 # Install system dependencies
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
-  aria2 samba python3 make g++ \
+  aria2 samba openssl \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
