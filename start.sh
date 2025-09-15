@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Ensure SAVE_DIR exists
-SAVE_DIR=$(node -e "console.log(require('os').tmpdir() + '/katal')")
+SAVE_DIR=$(bun -e "console.log(require('os').tmpdir() + '/katal')")
 
 mkdir -p "$SAVE_DIR"
 
@@ -65,7 +65,7 @@ smbd --foreground --no-process-group &
 
 sleep 2
 
-aria2c --enable-rpc --rpc-listen-all --rpc-listen-port=6398 --listen-port=6888 --enable-dht=true --enable-peer-exchange=true --seed-time=100 &
+aria2c --enable-rpc --rpc-listen-all --rpc-listen-port=6398 --listen-port=51413 --enable-dht=true --enable-peer-exchange=true --seed-time=100 &
 
 sleep 2
 

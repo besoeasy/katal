@@ -1,6 +1,5 @@
 <img width="1582" height="1123" alt="1" src="https://github.com/user-attachments/assets/6cecc83b-0fc9-4e57-ad94-706a2fffb038" />
 
-
 # 📥 KATAL
 
 **KATAL** is a **decentralized download manager** powered by a **Nostr bot**.
@@ -33,8 +32,8 @@ docker run -d \
   -p 6798:6798 \   # Bot setup UI
   -p 6799:6799 \   # Web file access
   -p 445:445 \     # SMB share
-  -p 6888:6888/tcp \
-  -p 6888:6888/udp \
+  -p 51413:51413/tcp \
+  -p 51413:51413/udp \
   -v katal-data:/tmp/katal \
   ghcr.io/besoeasy/katal:main
 ```
@@ -43,12 +42,12 @@ docker run -d \
 
 ## 📡 Ports
 
-| Port | Purpose               |
-| ---- | --------------------- |
-| 6798 | Bot setup UI          |
-| 6799 | Web file access       |
-| 445  | Samba SMB share       |
-| 6888 | Torrent communication |
+| Port  | Purpose               |
+| ----- | --------------------- |
+| 6798  | Bot setup UI          |
+| 6799  | Web file access       |
+| 445   | Samba SMB share       |
+| 51413 | Torrent communication |
 
 ---
 

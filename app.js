@@ -4,12 +4,8 @@ import path from "path";
 import fs from "fs";
 
 import { getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./modules/aria2.js";
-
 import { bytesToSize, getDirectorySize, getIpData, getImdbId, fetchTorrent, short, formatDownloadSpeed, getDownloadProgress } from "./modules/utils.js";
-
 import { SERVERPORT, WEBPORT, SAVE_DIR, SMBPORT } from "./modules/vars.js";
-
-import { startWebServer } from "./modules/web.js";
 
 dotenv.config();
 
@@ -450,7 +446,7 @@ async function handleCommand(sender, text) {
           `stats - show aria2 global stats\n` +
           `clean - delete oldest file\n` +
           `autoclean - delete files older than 30 days\n` +
-          `ip - server IP info\n` +
+          // removed ip command for privacy
           `time - server time\n\n` +
           `✅ You are authorized (whitelisted)`
       );
@@ -511,10 +507,6 @@ async function handleCommand(sender, text) {
         break;
       }
       await handleFind(sender, args[0]);
-      break;
-
-    case "ip":
-      await handleIpData(sender);
       break;
 
     case "time":
@@ -698,28 +690,6 @@ async function handleFind(sender, imdbInput) {
   } catch (error) {
     console.error("Find error:", error);
     await sendEncryptedDM(sender, "Failed to fetch torrents. Try again later.");
-  }
-}
-
-async function handleIpData(sender) {
-  try {
-    const ipData = await getIpData();
-    if (ipData) {
-      await sendEncryptedDM(
-        sender,
-        "🌐 Server IP Info\n" +
-          `IP: ${ipData.query}\n` +
-          `Country: ${ipData.country}\n` +
-          `Region: ${ipData.regionName}\n` +
-          `City: ${ipData.city}\n` +
-          `ISP: ${ipData.isp}`
-      );
-    } else {
-      await sendEncryptedDM(sender, "Could not fetch IP info. Try again later.");
-    }
-  } catch (error) {
-    console.error("IP data error:", error);
-    await sendEncryptedDM(sender, "Could not fetch IP info. Try again later.");
   }
 }
 
@@ -978,7 +948,74 @@ setTimeout(() => {
     getWhitelistCount: () => whitelist.size,
   };
 
-  webServer = startWebServer(WEBPORT, botData, SAVE_DIR, SERVERPORT, SMBPORT);
+  // Inline startWebServer logic from modules/web.js
+  webServer = Bun.serve({
+    port: WEBPORT,
+    async fetch(req) {
+      const url = new URL(req.url);
+      if (url.pathname === "/api/status") {
+        try {
+          const statsData = await getGlobalStats();
+          const stats = statsData?.result || {};
+          const saveDirSize = await getDirectorySize(SAVE_DIR).catch(() => 0);
+          return new Response(
+            JSON.stringify({
+              pubkey: botData.pubkey,
+              npub: botData.npub,
+              webxPort: SERVERPORT,
+              smbPort: SMBPORT,
+              saveDir: SAVE_DIR,
+              usedSpace: saveDirSize,
+              usedSpaceFormatted: bytesToSize(saveDirSize),
+              uptime: process.uptime(),
+              aria2Stats: stats,
+              unlockCode: botData.unlockCode,
+              whitelistCount: botData.getWhitelistCount ? botData.getWhitelistCount() : 0,
+              timestamp: new Date().toISOString(),
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        } catch (error) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+      }
+
+      // Serve index.html for root
+      if (url.pathname === "/") {
+        try {
+          const html = await readFile(join("public", "index.html"));
+          return new Response(html, { status: 200, headers: { "Content-Type": "text/html" } });
+        } catch {
+          return new Response("Not found", { status: 404 });
+        }
+      }
+
+      // Serve static files from public directory
+      if (url.pathname.startsWith("/")) {
+        const filePath = join("public", url.pathname);
+        try {
+          const file = await readFile(filePath);
+          // Basic content type detection
+          let contentType = "application/octet-stream";
+          if (filePath.endsWith(".js")) contentType = "application/javascript";
+          else if (filePath.endsWith(".css")) contentType = "text/css";
+          else if (filePath.endsWith(".html")) contentType = "text/html";
+          else if (filePath.endsWith(".json")) contentType = "application/json";
+          else if (filePath.endsWith(".png")) contentType = "image/png";
+          else if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg")) contentType = "image/jpeg";
+          else if (filePath.endsWith(".svg")) contentType = "image/svg+xml";
+          return new Response(file, { status: 200, headers: { "Content-Type": contentType } });
+        } catch {
+          // Not found
+        }
+      }
+      return new Response("Not found", { status: 404 });
+    },
+  });
+  console.log(`🌐 Web dashboard running on http://localhost:${WEBPORT}`);
 }, 1000);
 
 // Start periodic stats posting after a longer delay
