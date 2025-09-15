@@ -69,11 +69,6 @@ aria2c --enable-rpc --rpc-listen-all --rpc-listen-port=6398 --listen-port=59123 
 
 sleep 3
 
-# Start Nginx
-nginx -g 'daemon off;' &
-
-sleep 2
-
 while true; do
    bun app.js
    echo "Bot crashed with exit code $? - restarting in 5 seconds..."
