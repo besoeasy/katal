@@ -1,9 +1,7 @@
 import { SimplePool, nip19, getPublicKey, finalizeEvent, nip04, generateSecretKey, getEventHash } from "nostr-tools";
 import dotenv from "dotenv";
 import path from "path";
-import http from "http";
 import fs from "fs";
-import serveHandler from "serve-handler";
 
 import { getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./modules/aria2.js";
 
