@@ -5,13 +5,6 @@ const ARIA2_RPC_URL = "http://localhost:6398/jsonrpc";
 
 import { SAVE_DIR } from "./vars.js";
 
-const DEFAULT_TRACKERS = [
-  "udp://tracker.opentrackr.org:1337/announce",
-  "udp://open.demonii.com:1337/announce",
-  "udp://open.stealth.si:80/announce",
-  "udp://exodus.desync.com:6969/announce",
-];
-
 // ------------------ Core Aria2 Communication ------------------
 const axiosPost = async (method, params = []) => {
   try {
@@ -38,10 +31,6 @@ export const downloadAria = async (id, url) => {
   const options = {
     dir: downloadDir,
   };
-
-  if (url.startsWith("magnet:") || url.endsWith(".torrent")) {
-    options["bt-tracker"] = DEFAULT_TRACKERS.join(",");
-  }
 
   return await axiosPost("aria2.addUri", [[url], options]);
 };

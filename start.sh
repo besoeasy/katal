@@ -63,11 +63,13 @@ chmod -R 0775 "$SAVE_DIR"
 # Start Samba (SMB) server
 smbd --foreground --no-process-group &
 
-sleep 2
+sleep 5
 
-aria2c --enable-rpc --rpc-listen-all --rpc-listen-port=6398 --listen-port=59123 --enable-dht=true --enable-peer-exchange=true --seed-time=100 &
+aria2c --enable-rpc --rpc-listen-all --rpc-listen-port=6398 --listen-port=59123 \
+  --enable-dht=true --enable-peer-exchange=true --seed-time=100 \
+  --bt-tracker="udp://tracker.opentrackr.org:1337/announce,udp://open.demonii.com:1337/announce,udp://open.stealth.si:80/announce,udp://exodus.desync.com:6969/announce" &
 
-sleep 3
+sleep 5
 
 while true; do
    bun app.js
