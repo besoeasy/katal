@@ -26,16 +26,8 @@ Under the hood, it uses **aria2** for efficient downloads and integrates seamles
 Run KATAL using Docker:
 
 ```bash
-docker run -d \
-  --name katal \
-  --restart unless-stopped \
-  -p 6798:6798 \   # Bot setup UI
-  -p 6799:6799 \   # Web file access
-  -p 445:445 \     # SMB share
-  -p 59123:59123/tcp \
-  -p 59123:59123/udp \
-  -v katal-data:/tmp/katal \
-  ghcr.io/besoeasy/katal:main
+docker run -d --name katal --restart unless-stopped -p 6798:6798 -p 6799:6799 -p 445:445 -p 59123:59123/tcp -p 59123:59123/udp -v katal-data:/tmp/katal ghcr.io/besoeasy/katal:main
+
 ```
 
 OR
