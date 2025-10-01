@@ -354,14 +354,16 @@ function createRelayConnection() {
 
           // Check if it's a command (starts with known command words) or echo back
           const possibleCommand = cleanContent.split(/\s+/)[0].toLowerCase();
+
           const validCommands = ["help", "whoami", "start", "download", "dl", "downloading", "find", "ip", "time", "stats", "clean", "autoclean"];
 
           const isStatusCommand = possibleCommand.startsWith("status_");
           const isCancelCommand = possibleCommand.startsWith("cancel_");
+          const isDlHashCommand = possibleCommand.startsWith("dl_"); // Add this line
 
           console.log(`Checking command: '${possibleCommand}' from content: '${cleanContent}'`);
 
-          if (validCommands.includes(possibleCommand) || isStatusCommand || isCancelCommand) {
+          if (validCommands.includes(possibleCommand) || isStatusCommand || isCancelCommand || isDlHashCommand) {
             console.log(`Executing command: ${possibleCommand}`);
             // Add small delay before processing command to ensure stability
             setTimeout(() => handleCommand(sender, cleanContent), 500);
@@ -537,6 +539,14 @@ async function handleCommand(sender, text) {
         await handleStatus(sender, cmd.split("_")[1]);
       } else if (cmd.toLowerCase().startsWith("cancel_")) {
         await handleCancel(sender, cmd.split("_")[1]);
+      } else if (cmd.toLowerCase().startsWith("dl_")) {
+        const hash = cmd.split("_")[1];
+        if (hash) {
+          const magnetLink = `magnet:?xt=urn:btih:${hash}`;
+          await handleDownload(sender, magnetLink, sender.slice(0, 8));
+        } else {
+          await sendEncryptedDM(sender, "Invalid download command. Hash missing.");
+        }
       } else {
         await sendEncryptedDM(sender, `Unknown command: ${cmd}. Send help for list.`);
       }
@@ -681,10 +691,24 @@ async function handleFind(sender, imdbInput) {
       return;
     }
 
-    // Send first 3 torrents
+    // Send first 3 torrents with clickable download commands
     for (let i = 0; i < Math.min(3, torrents.length); i++) {
       const t = torrents[i];
-      await sendEncryptedDM(sender, `🎬 ${t.title}\n\n${t.magnet}`);
+
+      // Extract hash from magnet link
+      const hashMatch = t.magnet.match(/btih:([a-zA-Z0-9]+)/);
+      const hash = hashMatch ? hashMatch[1] : null;
+
+      let message = `🎬 ${t.title}\n\n`;
+
+      if (hash) {
+        // Add clickable download command
+        message += `📥 Quick download: dl_${hash}\n\n`;
+      }
+
+      message += t.magnet;
+
+      await sendEncryptedDM(sender, message);
     }
 
     if (torrents.length > 3) {
