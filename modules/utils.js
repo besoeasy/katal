@@ -58,3 +58,33 @@ export async function fetchTorrent(imdbId) {
 export function short(s) {
   return s ? s.slice(0, 6) + "..." + s.slice(-4) : s;
 }
+
+
+export const RELAYS = [
+  "wss://relay.damus.io",
+  "wss://nos.lol",
+  "wss://relay.snort.social",
+  "wss://nostr-pub.wellorder.net",
+  "wss://nostr.oxtr.dev",
+  "wss://relay.nostr.band",
+  "wss://nostr.wine",
+  "wss://relay.primal.net",
+  "wss://nostr.mom",
+  "wss://relay.nostr.info",
+  "wss://nostr-relay.wlvs.space",
+  "wss://relay.current.fyi",
+  "wss://brb.io",
+  "wss://nostr.fmt.wiz.biz",
+];
+
+export const randomcode = () => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+
+  const randomDecimal = Math.floor(Math.random() * (20 - 10 + 1)) + 10;
+
+  for (let i = 0; i < randomDecimal; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};

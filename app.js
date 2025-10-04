@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 
 import { getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload } from "./modules/aria2.js";
-import { bytesToSize, getDirectorySize, getImdbId, fetchTorrent, short } from "./modules/utils.js";
+import { bytesToSize, getDirectorySize, getImdbId, fetchTorrent, short, RELAYS, randomcode } from "./modules/utils.js";
 import { SERVERPORT, WEBPORT, SAVE_DIR, SMBPORT } from "./modules/vars.js";
 
 dotenv.config();
@@ -110,35 +110,6 @@ async function autoCleanOldFiles() {
     return "❌ Auto-clean failed. Try again later.";
   }
 }
-
-const RELAYS = [
-  "wss://relay.damus.io",
-  "wss://nos.lol",
-  "wss://relay.snort.social",
-  "wss://nostr-pub.wellorder.net",
-  "wss://nostr.oxtr.dev",
-  "wss://relay.nostr.band",
-  "wss://nostr.wine",
-  "wss://relay.primal.net",
-  "wss://nostr.mom",
-  "wss://relay.nostr.info",
-  "wss://nostr-relay.wlvs.space",
-  "wss://relay.current.fyi",
-  "wss://brb.io",
-  "wss://nostr.fmt.wiz.biz",
-];
-
-const randomcode = () => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-
-  const randomDecimal = Math.floor(Math.random() * (20 - 10 + 1)) + 10;
-
-  for (let i = 0; i < randomDecimal; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
 
 const UNLOCKCODE = process.env.UNLOCKCODE || randomcode();
 
