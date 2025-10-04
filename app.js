@@ -451,7 +451,6 @@ async function handleCommand(sender, text) {
           `stats - show aria2 global stats\n` +
           `clean - delete oldest file\n` +
           `autoclean - delete files older than 30 days\n` +
-          // removed ip command for privacy
           `time - server time\n\n` +
           `✅ You are authorized (whitelisted)`
       );
