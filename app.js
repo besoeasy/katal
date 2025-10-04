@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 
-import { getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload, isAria2Available } from "./modules/aria2.js";
-import { bytesToSize, getDirectorySize, getIpData, getImdbId, fetchTorrent, short, formatDownloadSpeed, getDownloadProgress } from "./modules/utils.js";
+import { getGlobalStats, downloadAria, getDownloadStatus, getOngoingDownloads, cancelDownload } from "./modules/aria2.js";
+import { bytesToSize, getDirectorySize, getImdbId, fetchTorrent, short } from "./modules/utils.js";
 import { SERVERPORT, WEBPORT, SAVE_DIR, SMBPORT } from "./modules/vars.js";
 
 dotenv.config();

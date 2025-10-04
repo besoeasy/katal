@@ -46,13 +46,3 @@ export const cancelDownload = async (gid) => {
   return await axiosPost("aria2.remove", [gid]);
 };
 
-// ------------------ Aria2 Helper Functions ------------------
-export const isAria2Available = async () => {
-  try {
-    const stats = await getGlobalStats();
-    return stats && stats.result !== undefined;
-  } catch (error) {
-    console.error("Aria2 availability check failed:", error);
-    return false;
-  }
-};
