@@ -2,9 +2,7 @@
 
 # 📥 KATAL
 
-**KATAL** is a **download manager** controlled by a **Nostr bot**.
-
-Download files to cloud and then it will allow you to access it via HTTP & SMB, you can use access your files android TV and mobile devices.
+**KATAL** is a **download manager** controlled by a **Nostr bot**. Download files to cloud and then it will allow you to access it via HTTP & SMB, you can use access your files android TV and mobile devices. Users interact with the system through encrypted direct messages on Nostr, which then controls a powerful download manager backend.
 
 ---
 
