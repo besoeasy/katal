@@ -2,10 +2,9 @@
 
 # 📥 KATAL
 
-**KATAL** is a **decentralized download manager** powered by a **Nostr bot**.
-It’s fast, censorship-resistant, and fully open-source — built as an alternative to [Telearia](https://github.com/besoeasy/telearia).
+**KATAL** is a **download manager** controlled by a **Nostr bot**.
 
-Under the hood, it uses **aria2** for efficient downloads and integrates seamlessly with decentralized systems.
+Download files to cloud and then it will allow you to access it via HTTP & SMB, you can use access your files android TV and mobile devices.
 
 ---
 
