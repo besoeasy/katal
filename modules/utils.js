@@ -59,7 +59,6 @@ export function short(s) {
   return s ? s.slice(0, 6) + "..." + s.slice(-4) : s;
 }
 
-
 export const RELAYS = [
   "wss://relay.damus.io",
   "wss://nos.lol",
@@ -75,6 +74,22 @@ export const RELAYS = [
   "wss://relay.current.fyi",
   "wss://brb.io",
   "wss://nostr.fmt.wiz.biz",
+  "wss://relay.nostr.bg",
+  "wss://nostr.inosta.cc",
+  "wss://relay.orangepill.dev",
+  "wss://nostr.rocks",
+  "wss://nostr.zebedee.cloud",
+  "wss://relay.nostrati.com",
+  "wss://nostr.sandwich.farm",
+  "wss://nostr.land",
+  "wss://relay.minds.com/nostr/v1/ws",
+  "wss://nostr.bitcoiner.social",
+  "wss://relay.lexingtonbitcoin.org",
+  "wss://nostr.hugo.com.br",
+  "wss://relay.nostr.ro",
+  "wss://nostr.bitcoinmaximalists.online",
+  "wss://nostr.8e23.net",
+  "wss://relay.nostr.nu",
 ];
 
 export const randomcode = () => {
