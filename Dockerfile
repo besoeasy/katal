@@ -2,10 +2,8 @@
 FROM oven/bun:latest
 
 # Install system dependencies
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
-  aria2 samba openssl \
-  && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y aria2 samba openssl
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
