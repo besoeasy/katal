@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Copy package manifests and install with Bun
 COPY package.json bun.lockb* ./
-RUN bun install --production
+RUN bun install
 
 # Copy the rest of the source code
 COPY . .
