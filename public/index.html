@@ -226,13 +226,6 @@
                   <!-- Left: Key Information -->
                   <div class="lg:col-span-2 space-y-4">
                     <div>
-                      <label class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Public Key (Hex)</label>
-                      <div class="mt-1 font-mono text-xs text-black bg-gray-50 p-3 rounded-lg border border-gray-200 break-all">
-                        {{ apiStatus.pubkey || 'Loading...' }}
-                      </div>
-                    </div>
-
-                    <div>
                       <label class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Nostr Public Key (NPUB)</label>
                       <div class="mt-1 font-mono text-xs text-black bg-gray-50 p-3 rounded-lg border border-gray-200 break-all">
                         {{ apiStatus.npub || 'Loading...' }}
@@ -242,7 +235,7 @@
                     <!-- Nostr Profile Link -->
                     <div class="pt-2">
                       <a
-                        :href="`https://nosta.me/${apiStatus.npub}`"
+                        :href="`https://primal.net/p/${apiStatus.npub}`"
                         target="_blank"
                         class="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
                       >
@@ -250,7 +243,7 @@
                           <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
                           <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"></path>
                         </svg>
-                        <span>View on Nosta.me</span>
+                        <span>View on primal</span>
                       </a>
                     </div>
                   </div>
