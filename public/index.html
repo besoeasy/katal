@@ -1,531 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>KATAL - System Dashboard</title>
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Vue.js CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
     <!-- Custom styles -->
     <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        }
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
 
-        .font-mono {
-            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', 'Source Code Pro', monospace;
-        }
+      .font-mono {
+        font-family: "JetBrains Mono", "Fira Code", "SF Mono", Monaco, Inconsolata, "Roboto Mono", "Source Code Pro", monospace;
+      }
 
-        /* Glassmorphism Effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+      /* Glassmorphism Effect */
+      .glass {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
         }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
         }
+        50% {
+          opacity: 0.6;
+        }
+      }
 
-        .fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
+      .fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+      }
 
-        .scale-in {
-            animation: scaleIn 0.4s ease-out forwards;
-        }
+      .scale-in {
+        animation: scaleIn 0.4s ease-out forwards;
+      }
 
-        .pulse-animate {
-            animation: pulse 2s ease-in-out infinite;
-        }
+      .pulse-animate {
+        animation: pulse 2s ease-in-out infinite;
+      }
 
-        /* Hover Effects */
-        .hover-scale {
-            transition: transform 0.2s ease-in-out;
-        }
+      /* Hover Effects */
+      .hover-scale {
+        transition: transform 0.2s ease-in-out;
+      }
 
-        .hover-scale:hover {
-            transform: scale(1.02);
-        }
+      .hover-scale:hover {
+        transform: scale(1.02);
+      }
 
-        /* Status Indicators */
-        .status-online {
-            background-color: #10b981;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
-        }
+      /* Status Indicators */
+      .status-online {
+        background-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+      }
 
-        .status-offline {
-            background-color: #ef4444;
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
-        }
+      .status-offline {
+        background-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+      }
 
-        /* Button Animations */
-        .btn-primary {
-            background-color: #000000;
-            transition: all 0.2s ease;
-        }
+      /* Button Animations */
+      .btn-primary {
+        background-color: #000000;
+        transition: all 0.2s ease;
+      }
 
-        .btn-primary:hover {
-            background-color: #1f2937;
-            transform: translateY(-1px);
-        }
+      .btn-primary:hover {
+        background-color: #1f2937;
+        transform: translateY(-1px);
+      }
 
-        .btn-primary:active {
-            transform: translateY(0);
-        }
+      .btn-primary:active {
+        transform: translateY(0);
+      }
     </style>
-</head>
-<<body class="min-h-screen bg-gray-100 font-sans">
+  </head>
+  <
+  <body class="min-h-screen bg-gray-100 font-sans">
     <div id="app" class="min-h-screen flex items-center justify-center p-4">
-        
-        <!-- Main Glass Card -->
-        <div class="glass rounded-3xl shadow-2xl w-full max-w-6xl mx-auto hover-scale fade-in overflow-hidden">
-            
-            <!-- Black Header -->
-            <div class="bg-black text-white px-8 py-6">
-                <div class="flex flex-col sm:flex-row items-center justify-between">
-                    <h1 class="text-3xl font-black uppercase tracking-wider text-center sm:text-left">
-                        KATAL
-                    </h1>
-                    <a href="https://github.com/besoeasy/katal" target="_blank" class="mt-4 sm:mt-0 inline-flex items-center space-x-2 bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors shadow-lg">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.207 11.387.6.113.793-.262.793-.583 0-.288-.012-1.243-.017-2.252-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.73.083-.73 1.205.085 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.606-2.665-.304-5.466-1.332-5.466-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.984-.399 3.003-.404 1.018.005 2.046.138 3.004.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.119 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.625-5.475 5.921.43.371.823 1.102.823 2.222 0 1.606-.015 2.899-.015 3.293 0 .323.192.699.8.581C20.565 21.796 24 17.297 24 12c0-6.63-5.37-12-12-12z"/>
+      <!-- Main Glass Card -->
+      <div class="glass rounded-3xl shadow-2xl w-full max-w-6xl mx-auto hover-scale fade-in overflow-hidden">
+        <!-- Black Header -->
+        <div class="bg-black text-white px-8 py-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between">
+            <h1 class="text-3xl font-black uppercase tracking-wider text-center sm:text-left">KATAL</h1>
+            <a
+              href="https://github.com/besoeasy/katal"
+              target="_blank"
+              class="mt-4 sm:mt-0 inline-flex items-center space-x-2 bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors shadow-lg"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.207 11.387.6.113.793-.262.793-.583 0-.288-.012-1.243-.017-2.252-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.73.083-.73 1.205.085 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.606-2.665-.304-5.466-1.332-5.466-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.984-.399 3.003-.404 1.018.005 2.046.138 3.004.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.119 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.625-5.475 5.921.43.371.823 1.102.823 2.222 0 1.606-.015 2.899-.015 3.293 0 .323.192.699.8.581C20.565 21.796 24 17.297 24 12c0-6.63-5.37-12-12-12z"
+                />
+              </svg>
+              <span>GitHub</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="flex flex-col lg:flex-row min-h-[600px]">
+          <!-- Left Sidebar - Status Panel (320px) -->
+          <div class="lg:w-80 bg-gray-50 border-r border-gray-200 p-6 space-y-6">
+            <!-- Relay Status -->
+            <div class="scale-in">
+              <h2 class="text-lg font-bold text-black uppercase tracking-wide mb-4">System Status</h2>
+
+              <div class="space-y-4">
+                <!-- Web Server Port -->
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span class="text-sm font-semibold text-gray-700">Web Port</span>
+                  <span class="font-mono text-black font-bold">6798</span>
+                </div>
+
+                <!-- File Server Port -->
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span class="text-sm font-semibold text-gray-700">File Server Port</span>
+                  <span class="font-mono text-black font-bold">{{ apiStatus.webxPort || 'N/A' }}</span>
+                </div>
+
+                <!-- SMB Port -->
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span class="text-sm font-semibold text-gray-700">SMB Port</span>
+                  <span class="font-mono text-black font-bold">{{ apiStatus.smbPort || 'N/A' }}</span>
+                </div>
+
+                <!-- Save Directory -->
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span class="text-sm font-semibold text-gray-700">Save Directory</span>
+                  <span class="font-mono text-black font-bold text-xs">{{ apiStatus.saveDir || 'N/A' }}</span>
+                </div>
+
+                <!-- Used Space -->
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span class="text-sm font-semibold text-gray-700">Used Space</span>
+                  <span class="font-mono text-black font-bold">{{ apiStatus.usedSpaceFormatted || '0 B' }}</span>
+                </div>
+
+                <!-- Uptime -->
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span class="text-sm font-semibold text-gray-700">Uptime</span>
+                  <span class="font-mono text-black font-bold">{{ formatUptime(apiStatus.uptime) }}</span>
+                </div>
+
+                <!-- Unlock Code -->
+                <div>
+                  <label class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Unlock Code</label>
+                  <div class="mt-1 font-mono text-lg text-black bg-yellow-50 p-3 rounded-lg border border-yellow-300 text-center font-bold">
+                    {{ apiStatus.unlockCode || 'N/A' }}
+                  </div>
+                </div>
+
+                <!-- Whitelisted Users -->
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span class="text-sm font-semibold text-gray-700">Authorized Users</span>
+                  <span class="font-mono text-black font-bold">{{ apiStatus.whitelistCount }}</span>
+                </div>
+
+                <!-- Connection Status Indicator -->
+                <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200">
+                  <div class="w-3 h-3 rounded-full pulse-animate" :class="isSystemOnline() ? 'status-online' : 'status-offline'"></div>
+                  <span class="font-semibold" :class="isSystemOnline() ? 'text-green-700' : 'text-red-700'">
+                    {{ isSystemOnline() ? 'ONLINE' : 'OFFLINE' }}
+                  </span>
+                </div>
+
+                <!-- Last Updated -->
+                <div class="text-xs text-gray-500 font-mono">
+                  Last updated: {{ formatTimestamp(lastUpdated) }}<br />
+                  API timestamp: {{ formatApiTimestamp(apiStatus.timestamp) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Main Content - Extended Status -->
+          <div class="flex-1 p-8">
+            <!-- Extended Status Display -->
+            <div class="h-full space-y-6">
+              <!-- Bot Identity Section -->
+              <div class="scale-in bg-white rounded-2xl p-6 border border-gray-200">
+                <h3 class="text-xl font-bold text-black uppercase tracking-wide mb-4">Bot Identity</h3>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <!-- Left: Key Information -->
+                  <div class="lg:col-span-2 space-y-4">
+                    <div>
+                      <label class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Public Key (Hex)</label>
+                      <div class="mt-1 font-mono text-xs text-black bg-gray-50 p-3 rounded-lg border border-gray-200 break-all">
+                        {{ apiStatus.pubkey || 'Loading...' }}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Nostr Public Key (NPUB)</label>
+                      <div class="mt-1 font-mono text-xs text-black bg-gray-50 p-3 rounded-lg border border-gray-200 break-all">
+                        {{ apiStatus.npub || 'Loading...' }}
+                      </div>
+                    </div>
+
+                    <!-- Nostr Profile Link -->
+                    <div class="pt-2">
+                      <a
+                        :href="`https://nosta.me/${apiStatus.npub}`"
+                        target="_blank"
+                        class="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                      >
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
+                          <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"></path>
                         </svg>
-                        <span>GitHub</span>
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Two Column Layout -->
-            <div class="flex flex-col lg:flex-row min-h-[600px]">
-                
-                <!-- Left Sidebar - Status Panel (320px) -->
-                <div class="lg:w-80 bg-gray-50 border-r border-gray-200 p-6 space-y-6">
-                    
-                    <!-- Relay Status -->
-                    <div class="scale-in">
-                        <h2 class="text-lg font-bold text-black uppercase tracking-wide mb-4">
-                            System Status
-                        </h2>
-                        
-                        <div class="space-y-4">
-                   
-                            
-                            <!-- Web Server Port -->
-                            <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                                <span class="text-sm font-semibold text-gray-700">Web Port</span>
-                                <span class="font-mono text-black font-bold">6798</span>
-                            </div>
-
-                            <!-- File Server Port -->
-                            <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                                <span class="text-sm font-semibold text-gray-700">File Server Port</span>
-                                <span class="font-mono text-black font-bold">{{ apiStatus.webxPort || 'N/A' }}</span>
-                            </div>
-
-                            <!-- SMB Port -->
-                            <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                                <span class="text-sm font-semibold text-gray-700">SMB Port</span>
-                                <span class="font-mono text-black font-bold">{{ apiStatus.smbPort || 'N/A' }}</span>
-                            </div>
-
-                            <!-- Save Directory -->
-                            <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                                <span class="text-sm font-semibold text-gray-700">Save Directory</span>
-                                <span class="font-mono text-black font-bold text-xs">{{ apiStatus.saveDir || 'N/A' }}</span>
-                            </div>
-                            
-                            <!-- Used Space -->
-                            <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                                <span class="text-sm font-semibold text-gray-700">Used Space</span>
-                                <span class="font-mono text-black font-bold">{{ apiStatus.usedSpaceFormatted || '0 B' }}</span>
-                            </div>
-                            
-                            <!-- Uptime -->
-                            <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                                <span class="text-sm font-semibold text-gray-700">Uptime</span>
-                                <span class="font-mono text-black font-bold">{{ formatUptime(apiStatus.uptime) }}</span>
-                            </div>
-                            
-                            <!-- Unlock Code -->
-                            <div>
-                                <label class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Unlock Code</label>
-                                <div class="mt-1 font-mono text-lg text-black bg-yellow-50 p-3 rounded-lg border border-yellow-300 text-center font-bold">
-                                    {{ apiStatus.unlockCode || 'N/A' }}
-                                </div>
-                            </div>
-                            
-                            <!-- Whitelisted Users -->
-                            <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                                <span class="text-sm font-semibold text-gray-700">Authorized Users</span>
-                                <span class="font-mono text-black font-bold">{{ apiStatus.whitelistCount }}</span>
-                            </div>
-                            
-                            <!-- Connection Status Indicator -->
-                            <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200">
-                                <div class="w-3 h-3 rounded-full pulse-animate" 
-                                     :class="isSystemOnline() ? 'status-online' : 'status-offline'"></div>
-                                <span class="font-semibold" :class="isSystemOnline() ? 'text-green-700' : 'text-red-700'">
-                                    {{ isSystemOnline() ? 'ONLINE' : 'OFFLINE' }}
-                                </span>
-                            </div>
-                            
-                            <!-- Last Updated -->
-                            <div class="text-xs text-gray-500 font-mono">
-                                Last updated: {{ formatTimestamp(lastUpdated) }}<br>
-                                API timestamp: {{ formatApiTimestamp(apiStatus.timestamp) }}
-                            </div>
-                        </div>
+                        <span>View on Nosta.me</span>
+                      </a>
                     </div>
-                </div>
-                
-                <!-- Right Main Content - Extended Status -->
-                <div class="flex-1 p-8">
-                    
-                    <!-- Extended Status Display -->
-                    <div class="h-full space-y-6">
-                        
-             
-                        <!-- Bot Identity Section -->
-                        <div class="scale-in bg-white rounded-2xl p-6 border border-gray-200">
-                            <h3 class="text-xl font-bold text-black uppercase tracking-wide mb-4">
-                                Bot Identity
-                            </h3>
-                            
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <!-- Left: Key Information -->
-                                <div class="lg:col-span-2 space-y-4">
-                                    <div>
-                                        <label class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Public Key (Hex)</label>
-                                        <div class="mt-1 font-mono text-xs text-black bg-gray-50 p-3 rounded-lg border border-gray-200 break-all">
-                                            {{ apiStatus.pubkey || 'Loading...' }}
-                                        </div>
-                                    </div>
-                                    
-                                    <div>
-                                        <label class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Nostr Public Key (NPUB)</label>
-                                        <div class="mt-1 font-mono text-xs text-black bg-gray-50 p-3 rounded-lg border border-gray-200 break-all">
-                                            {{ apiStatus.npub || 'Loading...' }}
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Nostr Profile Link -->
-                                    <div class="pt-2">
-                                        <a :href="`https://nosta.me/${apiStatus.npub}`" 
-                                           target="_blank" 
-                                           class="inline-flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
-                                                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"></path>
-                                            </svg>
-                                            <span>View on Nosta.me</span>
-                                        </a>
-                                    </div>
-                                </div>
-                                
-                                <!-- Right: QR Code -->
-                                <div class="flex flex-col items-center justify-center space-y-3">
-                                    <div class="bg-white p-4 rounded-xl shadow-lg border-2 border-gray-200">
-                                        <img 
-                                            :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(apiStatus.npub)}`"
-                                            :alt="`QR Code for ${apiStatus.npub}`"
-                                            class="w-30 h-30 rounded-lg"
-                                            v-if="apiStatus.npub"
-                                        >
-                                        <div v-else class="w-30 h-30 bg-gray-200 rounded-lg flex items-center justify-center">
-                                            <span class="text-gray-500 text-xs">Loading...</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-gray-500 text-center font-medium">
-                                        Scan to connect<br>with Katal on Nostr
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Download Statistics -->
-                        <div class="scale-in bg-white rounded-2xl p-6 border border-gray-200">
-                            <h3 class="text-xl font-bold text-black uppercase tracking-wide mb-4">
-                                Download Statistics
-                            </h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <!-- Speed Stats -->
-                                <div class="space-y-3">
-                                    <h4 class="text-sm font-bold text-gray-800 uppercase">Transfer Speeds</h4>
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm text-gray-600">Download:</span>
-                                            <span class="font-mono font-bold text-green-600">{{ formatSpeed(apiStatus.aria2Stats.downloadSpeed) }}</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm text-gray-600">Upload:</span>
-                                            <span class="font-mono font-bold text-blue-600">{{ formatSpeed(apiStatus.aria2Stats.uploadSpeed) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Queue Stats -->
-                                <div class="space-y-3">
-                                    <h4 class="text-sm font-bold text-gray-800 uppercase">Queue Status</h4>
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm text-gray-600">Active:</span>
-                                            <span class="font-mono font-bold text-green-600">{{ apiStatus.aria2Stats.numActive || 0 }}</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm text-gray-600">Waiting:</span>
-                                            <span class="font-mono font-bold text-yellow-600">{{ apiStatus.aria2Stats.numWaiting || 0 }}</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm text-gray-600">Completed:</span>
-                                            <span class="font-mono font-bold text-gray-600">{{ apiStatus.aria2Stats.numStopped || 0 }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                            
-                            </div>
-                        </div>
+                  </div>
+
+                  <!-- Right: QR Code -->
+                  <div class="flex flex-col items-center justify-center space-y-3">
+                    <div class="bg-white p-4 rounded-xl shadow-lg border-2 border-gray-200">
+                      <img
+                        :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(apiStatus.npub)}`"
+                        :alt="`QR Code for ${apiStatus.npub}`"
+                        class="w-30 h-30 rounded-lg"
+                        v-if="apiStatus.npub"
+                      />
+                      <div v-else class="w-30 h-30 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span class="text-gray-500 text-xs">Loading...</span>
+                      </div>
                     </div>
+                    <p class="text-xs text-gray-500 text-center font-medium">Scan to connect<br />with Katal on Nostr</p>
+                  </div>
                 </div>
+              </div>
+
+              <!-- Download Statistics -->
+              <div class="scale-in bg-white rounded-2xl p-6 border border-gray-200">
+                <h3 class="text-xl font-bold text-black uppercase tracking-wide mb-4">Download Statistics</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <!-- Speed Stats -->
+                  <div class="space-y-3">
+                    <h4 class="text-sm font-bold text-gray-800 uppercase">Transfer Speeds</h4>
+                    <div class="space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Download:</span>
+                        <span class="font-mono font-bold text-green-600">{{ formatSpeed(apiStatus.aria2Stats.downloadSpeed) }}</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Upload:</span>
+                        <span class="font-mono font-bold text-blue-600">{{ formatSpeed(apiStatus.aria2Stats.uploadSpeed) }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Queue Stats -->
+                  <div class="space-y-3">
+                    <h4 class="text-sm font-bold text-gray-800 uppercase">Queue Status</h4>
+                    <div class="space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Active:</span>
+                        <span class="font-mono font-bold text-green-600">{{ apiStatus.aria2Stats.numActive || 0 }}</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Waiting:</span>
+                        <span class="font-mono font-bold text-yellow-600">{{ apiStatus.aria2Stats.numWaiting || 0 }}</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Completed:</span>
+                        <span class="font-mono font-bold text-gray-600">{{ apiStatus.aria2Stats.numStopped || 0 }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
-        
-        <!-- Toast Notifications -->
-        <div v-if="showToast" 
-             class="fixed bottom-6 right-6 bg-white border border-gray-200 rounded-lg shadow-2xl p-4 scale-in">
-            <div class="flex items-center space-x-3">
-                <div class="w-2 h-2 bg-green-500 rounded-full pulse-animate"></div>
-                <span class="text-sm font-semibold text-black">{{ toastMessage }}</span>
-            </div>
+      </div>
+
+      <!-- Toast Notifications -->
+      <div v-if="showToast" class="fixed bottom-6 right-6 bg-white border border-gray-200 rounded-lg shadow-2xl p-4 scale-in">
+        <div class="flex items-center space-x-3">
+          <div class="w-2 h-2 bg-green-500 rounded-full pulse-animate"></div>
+          <span class="text-sm font-semibold text-black">{{ toastMessage }}</span>
         </div>
+      </div>
     </div>
     <script>
-        const { createApp } = Vue;
-        
-        createApp({
-            data() {
-                return {
-                    // Relay Status Data (will be populated from API)
-                    relayStatus: {
-                        nodeId: 'Loading...',
-                        peers: 0,
-                        bandwidth: '0 B/s',
-                        repoSize: '0 B',
-                        version: 'Loading...',
-                        online: false
-                    },
-                    
-                    // API Status Data
-                    apiStatus: {
-                        pubkey: '',
-                        npub: '',
-                        webxPort: 0,
-                        smbPort: 0,
-                        saveDir: '',
-                        usedSpace: 0,
-                        usedSpaceFormatted: '',
-                        uptime: 0,
-                        aria2Stats: {},
-                        unlockCode: '',
-                        whitelistCount: 0,
-                        timestamp: ''
-                    },
-                    
-                    // UI State
-                    lastUpdated: new Date(),
-                    showToast: false,
-                    toastMessage: '',
-                    
-                    // Auto-refresh
-                    refreshInterval: null
-                }
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            // Relay Status Data (will be populated from API)
+            relayStatus: {
+              nodeId: "Loading...",
+              peers: 0,
+              bandwidth: "0 B/s",
+              repoSize: "0 B",
+              version: "Loading...",
+              online: false,
             },
-            
-            mounted() {
-                this.loadApiData();
-                this.startAutoRefresh();
+
+            // API Status Data
+            apiStatus: {
+              pubkey: "",
+              npub: "",
+              webxPort: 0,
+              smbPort: 0,
+              saveDir: "",
+              usedSpace: 0,
+              usedSpaceFormatted: "",
+              uptime: 0,
+              aria2Stats: {},
+              unlockCode: "",
+              whitelistCount: 0,
+              timestamp: "",
             },
-            
-            beforeUnmount() {
-                if (this.refreshInterval) {
-                    clearInterval(this.refreshInterval);
-                }
-            },
-            
-            methods: {
-                // Utility Methods
-                formatFileSize(bytes) {
-                    if (bytes === 0) return '0 B';
-                    const k = 1024;
-                    const sizes = ['B', 'KB', 'MB', 'GB'];
-                    const i = Math.floor(Math.log(bytes) / Math.log(k));
-                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-                },
-                
-                formatTimestamp(date) {
-                    if (!date) return 'Never';
-                    return date.toLocaleTimeString();
-                },
-                
-                formatApiTimestamp(timestamp) {
-                    if (!timestamp) return 'N/A';
-                    return new Date(timestamp).toLocaleTimeString();
-                },
-                
-                formatUptime(seconds) {
-                    if (!seconds) return '0s';
-                    
-                    const days = Math.floor(seconds / 86400);
-                    const hours = Math.floor((seconds % 86400) / 3600);
-                    const minutes = Math.floor((seconds % 3600) / 60);
-                    const secs = Math.floor(seconds % 60);
-                    
-                    if (days > 0) {
-                        return `${days}d ${hours}h ${minutes}m`;
-                    } else if (hours > 0) {
-                        return `${hours}h ${minutes}m ${secs}s`;
-                    } else if (minutes > 0) {
-                        return `${minutes}m ${secs}s`;
-                    } else {
-                        return `${secs}s`;
-                    }
-                },
-                
-                formatSpeed(speed) {
-                    if (!speed || speed === '0') return '0 B/s';
-                    
-                    const bytes = parseInt(speed);
-                    if (isNaN(bytes)) return speed;
-                    
-                    const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
-                    let size = bytes;
-                    let unitIndex = 0;
-                    
-                    while (size >= 1024 && unitIndex < units.length - 1) {
-                        size /= 1024;
-                        unitIndex++;
-                    }
-                    
-                    return `${size.toFixed(1)} ${units[unitIndex]}`;
-                },
-                
-                async copyToClipboard(text) {
-                    try {
-                        await navigator.clipboard.writeText(text);
-                        this.showToastMessage('Copied to clipboard!');
-                    } catch (error) {
-                        console.error('Failed to copy:', error);
-                        this.showToastMessage('Failed to copy to clipboard');
-                    }
-                },
-                
-                showToastMessage(message) {
-                    this.toastMessage = message;
-                    this.showToast = true;
-                    
-                    setTimeout(() => {
-                        this.showToast = false;
-                    }, 3000);
-                },
-                
-                // Auto-refresh and data loading
-                async loadApiData() {
-                    try {
-                        const response = await fetch('/api/status');
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        
-                        const data = await response.json();
-                        
-                        // Update API status with real data
-                        this.apiStatus = {
-                            pubkey: data.pubkey || '',
-                            npub: data.npub || '',
-                            webxPort: data.webxPort || 0,
-                            smbPort: data.smbPort || 0,
-                            saveDir: data.saveDir || '',
-                            usedSpace: data.usedSpace || 0,
-                            usedSpaceFormatted: data.usedSpaceFormatted || '0 B',
-                            uptime: data.uptime || 0,
-                            aria2Stats: data.aria2Stats || {},
-                            unlockCode: data.unlockCode || '',
-                            whitelistCount: data.whitelistCount || 0,
-                            timestamp: data.timestamp || new Date().toISOString()
-                        };
-                        
-                        // Update relay status with derived/mapped data
-                        this.relayStatus.nodeId = data.pubkey ? data.pubkey.substring(0, 20) + '...' : 'N/A';
-                        this.relayStatus.peers = this.getActivePeers();
-                        this.relayStatus.bandwidth = this.getTotalBandwidth();
-                        this.relayStatus.repoSize = data.usedSpaceFormatted || '0 B';
-                        this.relayStatus.version = 'v1.0.0'; // Static for now, can be added to API later
-                        this.relayStatus.online = this.isSystemOnline();
-                        
-                        this.lastUpdated = new Date();
-                        
-                        console.log('API Status loaded:', this.apiStatus);
-                        
-                    } catch (error) {
-                        console.error('Failed to load API status:', error);
-                        this.showToastMessage('Failed to load status data');
-                        this.relayStatus.online = false;
-                    }
-                },
-                
-                getActivePeers() {
-                    // Calculate active peers based on aria2 stats
-                    const stats = this.apiStatus.aria2Stats || {};
-                    return parseInt(stats.numActive || 0) + parseInt(stats.numWaiting || 0);
-                },
-                
-                getTotalBandwidth() {
-                    const stats = this.apiStatus.aria2Stats || {};
-                    const download = parseInt(stats.downloadSpeed || 0);
-                    const upload = parseInt(stats.uploadSpeed || 0);
-                    return this.formatSpeed(download + upload);
-                },
-                
-                isSystemOnline() {
-                    return this.apiStatus.uptime > 0 && this.apiStatus.pubkey !== '';
-                },
-                
-                startAutoRefresh() {
-                    this.refreshInterval = setInterval(() => {
-                        this.loadApiData();
-                    }, 5000);
-                },
-                
-                loadMockData() {
-                    // Remove this method as we're using real API data now
-                    console.log('Using real API data instead of mock data');
-                }
+
+            // UI State
+            lastUpdated: new Date(),
+            showToast: false,
+            toastMessage: "",
+
+            // Auto-refresh
+            refreshInterval: null,
+          };
+        },
+
+        mounted() {
+          this.loadApiData();
+          this.startAutoRefresh();
+        },
+
+        beforeUnmount() {
+          if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+          }
+        },
+
+        methods: {
+          // Utility Methods
+          formatFileSize(bytes) {
+            if (bytes === 0) return "0 B";
+            const k = 1024;
+            const sizes = ["B", "KB", "MB", "GB"];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+          },
+
+          formatTimestamp(date) {
+            if (!date) return "Never";
+            return date.toLocaleTimeString();
+          },
+
+          formatApiTimestamp(timestamp) {
+            if (!timestamp) return "N/A";
+            return new Date(timestamp).toLocaleTimeString();
+          },
+
+          formatUptime(seconds) {
+            if (!seconds) return "0s";
+
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+
+            if (days > 0) {
+              return `${days}d ${hours}h ${minutes}m`;
+            } else if (hours > 0) {
+              return `${hours}h ${minutes}m ${secs}s`;
+            } else if (minutes > 0) {
+              return `${minutes}m ${secs}s`;
+            } else {
+              return `${secs}s`;
             }
-        }).mount('#app');
+          },
+
+          formatSpeed(speed) {
+            if (!speed || speed === "0") return "0 B/s";
+
+            const bytes = parseInt(speed);
+            if (isNaN(bytes)) return speed;
+
+            const units = ["B/s", "KB/s", "MB/s", "GB/s"];
+            let size = bytes;
+            let unitIndex = 0;
+
+            while (size >= 1024 && unitIndex < units.length - 1) {
+              size /= 1024;
+              unitIndex++;
+            }
+
+            return `${size.toFixed(1)} ${units[unitIndex]}`;
+          },
+
+          async copyToClipboard(text) {
+            try {
+              await navigator.clipboard.writeText(text);
+              this.showToastMessage("Copied to clipboard!");
+            } catch (error) {
+              console.error("Failed to copy:", error);
+              this.showToastMessage("Failed to copy to clipboard");
+            }
+          },
+
+          showToastMessage(message) {
+            this.toastMessage = message;
+            this.showToast = true;
+
+            setTimeout(() => {
+              this.showToast = false;
+            }, 3000);
+          },
+
+          // Auto-refresh and data loading
+          async loadApiData() {
+            try {
+              const response = await fetch("/api/status");
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              const data = await response.json();
+
+              // Update API status with real data
+              this.apiStatus = {
+                pubkey: data.pubkey || "",
+                npub: data.npub || "",
+                webxPort: data.webxPort || 0,
+                smbPort: data.smbPort || 0,
+                saveDir: data.saveDir || "",
+                usedSpace: data.usedSpace || 0,
+                usedSpaceFormatted: data.usedSpaceFormatted || "0 B",
+                uptime: data.uptime || 0,
+                aria2Stats: data.aria2Stats || {},
+                unlockCode: data.unlockCode || "",
+                whitelistCount: data.whitelistCount || 0,
+                timestamp: data.timestamp || new Date().toISOString(),
+              };
+
+              // Update relay status with derived/mapped data
+              this.relayStatus.nodeId = data.pubkey ? data.pubkey.substring(0, 20) + "..." : "N/A";
+              this.relayStatus.peers = this.getActivePeers();
+              this.relayStatus.bandwidth = this.getTotalBandwidth();
+              this.relayStatus.repoSize = data.usedSpaceFormatted || "0 B";
+              this.relayStatus.version = "v1.0.0"; // Static for now, can be added to API later
+              this.relayStatus.online = this.isSystemOnline();
+
+              this.lastUpdated = new Date();
+
+              console.log("API Status loaded:", this.apiStatus);
+            } catch (error) {
+              console.error("Failed to load API status:", error);
+              this.showToastMessage("Failed to load status data");
+              this.relayStatus.online = false;
+            }
+          },
+
+          getActivePeers() {
+            // Calculate active peers based on aria2 stats
+            const stats = this.apiStatus.aria2Stats || {};
+            return parseInt(stats.numActive || 0) + parseInt(stats.numWaiting || 0);
+          },
+
+          getTotalBandwidth() {
+            const stats = this.apiStatus.aria2Stats || {};
+            const download = parseInt(stats.downloadSpeed || 0);
+            const upload = parseInt(stats.uploadSpeed || 0);
+            return this.formatSpeed(download + upload);
+          },
+
+          isSystemOnline() {
+            return this.apiStatus.uptime > 0 && this.apiStatus.pubkey !== "";
+          },
+
+          startAutoRefresh() {
+            this.refreshInterval = setInterval(() => {
+              this.loadApiData();
+            }, 5000);
+          },
+
+          loadMockData() {
+            // Remove this method as we're using real API data now
+            console.log("Using real API data instead of mock data");
+          },
+        },
+      }).mount("#app");
     </script>
-</body>
+  </body>
 </html>
