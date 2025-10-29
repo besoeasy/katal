@@ -374,6 +374,14 @@ function createRelayConnection() {
               whitelist.add(sender);
               console.log(`✅ User ${short(sender)} authorized with unlock code`);
               await sendEncryptedDM(sender, `🔓 Access granted! You are now authorized to use Katal Bot.\n\n` + `Send "help" to see available commands.`);
+              // Post a public note about the new authorization
+              try {
+                const npub = nip19.npubEncode(sender);
+                await postPublicNote(`🎉 New user authorized: npub${npub.slice(4, 16)}...`);
+                console.log(`Posted public note for new user authorization: npub${npub.slice(4, 16)}...`);
+              } catch (err) {
+                console.warn("Failed to post new user authorization note:", err && err.message ? err.message : err);
+              }
               return;
             }
 
@@ -998,9 +1006,16 @@ process.on("SIGINT", async () => {
 console.log("Katal Bot starting up...");
 
 // Add startup delay to ensure all services are ready
-setTimeout(() => {
+setTimeout(async () => {
   console.log("Katal Bot running - send me a DM with commands!");
-}, 7000);
+
+  try {
+    await postPublicNote("Hello world ! i — Katal Bot is online!");
+    console.log("Posted startup public note: Hello world ! i — Katal Bot is online!");
+  } catch (err) {
+    console.warn("Failed to post startup public note:", err && err.message ? err.message : err);
+  }
+}, 15000);
 
 // Start web dashboard with a small delay
 setTimeout(() => {
