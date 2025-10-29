@@ -7,61 +7,47 @@ mkdir -p "$SAVE_DIR"
 
 echo "Download directory: $SAVE_DIR"
 
-# Generate random SMB credentials
-SMB_USER="x$(shuf -i 1000-9999 -n 1)"
+# Generate random SMB credentials (simpler approach for non-root)
+SMB_USER="katal$(shuf -i 1000-9999 -n 1)"
 SMB_PASS=$(openssl rand -base64 12 | tr -d "=+/" | cut -c1-10)
 
-# Create SMB user and set password
-useradd -M -s /bin/false "$SMB_USER"
-echo "$SMB_USER:$SMB_PASS" | chpasswd
-(echo "$SMB_PASS"; echo "$SMB_PASS") | smbpasswd -a "$SMB_USER"
-
-# Save credentials for the bot to display (outside web-accessible directory)
-echo "$SMB_USER:$SMB_PASS" > /var/run/smb_credentials.txt
+# Save credentials for the bot to display
+echo "$SMB_USER:$SMB_PASS" > "$SAVE_DIR/../smb_credentials.txt"
 
 echo "SMB Credentials: $SMB_USER / $SMB_PASS"
 
 sleep 2
 
-# Create minimal smb.conf for guest access
-cat >/etc/samba/smb.conf <<EOL
+# Create minimal smb.conf that works without root
+# Use simple guest-only access since we can't create system users
+cat >"$SAVE_DIR/../smb.conf" <<EOL
 [global]
    map to guest = Bad User
-   guest account = nobody
    server min protocol = SMB2
    disable netbios = yes
    smb ports = 445
+   log level = 1
+   load printers = no
+   printcap name = /dev/null
+   disable spoolss = yes
 
 [katal]
-   comment = Read-only downloads
-   path = $SAVE_DIR
-   read only = yes
-   guest ok = yes
-   force user = nobody
-   browseable = yes
-
-[katal-rw]
-   comment = Full access downloads
+   comment = Katal downloads
    path = $SAVE_DIR
    read only = no
-   valid users = $SMB_USER
-   force user = $SMB_USER
-   force group = users
+   guest ok = yes
+   force user = $(id -un)
    browseable = yes
    create mask = 0664
    directory mask = 0775
 EOL
 
-# Ensure permissions for guest access
-chown -R nobody:nogroup "$SAVE_DIR"
-chmod -R 0775 "$SAVE_DIR"
+# Set permissions for current user
+chmod -R 0775 "$SAVE_DIR" 2>/dev/null || true
 
-# Also set permissions for the authenticated user
-chown -R "$SMB_USER":users "$SAVE_DIR"
-chmod -R 0775 "$SAVE_DIR"
-
-# Start Samba (SMB) server
-smbd --foreground --no-process-group &
+# Start Samba with custom config (non-root mode)
+# Note: This may have limited functionality when not running as root
+smbd --foreground --no-process-group --configfile="$SAVE_DIR/../smb.conf" --log-stdout &
 
 sleep 5
 
@@ -71,8 +57,21 @@ aria2c --enable-rpc --rpc-listen-all --rpc-listen-port=6398 --listen-port=59123 
 
 sleep 5
 
+# Trap signals and forward to child processes
+trap 'kill $(jobs -p); exit 0' SIGTERM SIGINT
+
 while true; do
-   bun app.js
-   echo "Bot crashed with exit code $? - restarting in 5 seconds..."
+   bun app.js &
+   APP_PID=$!
+   wait $APP_PID
+   EXIT_CODE=$?
+   
+   # If we received a signal, don't restart
+   if [ $EXIT_CODE -eq 143 ] || [ $EXIT_CODE -eq 130 ]; then
+       echo "Received shutdown signal, exiting..."
+       exit 0
+   fi
+   
+   echo "Bot crashed with exit code $EXIT_CODE - restarting in 5 seconds..."
    sleep 7
 done
