@@ -1,3 +1,71 @@
+// Add at the very beginning of the file, before any other code
+
+let isShuttingDown = false;
+
+// Graceful shutdown handler
+async function gracefulShutdown(signal) {
+  if (isShuttingDown) {
+    console.log("Already shutting down, please wait...");
+    return;
+  }
+
+  isShuttingDown = true;
+  console.log(`\n${signal} received - starting graceful shutdown...`);
+
+  try {
+    // Stop periodic stats posting
+    if (typeof stopPeriodicStatsPosting === "function") {
+      stopPeriodicStatsPosting();
+      console.log("✓ Stopped stats posting");
+    }
+
+    // Close web server
+    if (webServer) {
+      webServer.stop();
+      console.log("✓ Web server closed");
+    }
+
+    // Close the subscription
+    if (sub && sub.close) {
+      sub.close();
+      console.log("✓ Closed subscription");
+    }
+
+    // Destroy the pool (closes all relay connections)
+    if (pool && pool.close) {
+      await pool.close(RELAYS);
+      console.log("✓ Closed relay connections");
+    }
+
+    // Clear processed events
+    if (processedEvents) {
+      processedEvents.clear();
+      console.log("✓ Cleared event cache");
+    }
+
+    console.log("✓ Graceful shutdown complete");
+    process.exit(0);
+  } catch (error) {
+    console.error("Error during shutdown:", error);
+    process.exit(1);
+  }
+}
+
+// Register signal handlers immediately
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGHUP", () => gracefulShutdown("SIGHUP"));
+
+// Prevent the process from exiting on unhandled errors during shutdown
+process.on("uncaughtException", (error) => {
+  if (isShuttingDown) {
+    console.log("Error during shutdown (ignoring):", error.message);
+  } else {
+    console.error("Uncaught exception:", error);
+    gracefulShutdown("UNCAUGHT_EXCEPTION");
+  }
+});
+
 import { SimplePool, nip19, getPublicKey, finalizeEvent, nip04, generateSecretKey, getEventHash } from "nostr-tools";
 import dotenv from "dotenv";
 import path from "path";
